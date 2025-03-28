@@ -17,69 +17,95 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Box,
 } from "@mui/material";
+import { db } from "./firebaseConfig";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 
 export default function Dashboard() {
   const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
-  const [newTicket, setNewTicket] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [newTicket, setNewTicket] = useState({
+    Priority: "",
+    Status: "",
+    "S. No.": "",
+    Name: "",
+    "Contact No.": "",
+    Device: "",
+    "Issues/Demands": "",
+    "$$$": "",
+    Service: "",
+    "Parts Used": "",
+    Called: "",
+    Notes: "",
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("/tickets.xlsx");
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const arrayBuffer = await response.arrayBuffer();
-        const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: "array" });
-
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const parsedData = XLSX.utils.sheet_to_json(sheet);
-
-        setData(parsedData);
+        const querySnapshot = await getDocs(collection(db, "tickets"));
+        const tickets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setData(tickets);
       } catch (error) {
-        console.error("Error loading Excel file:", error);
+        console.error("Error loading tickets:", error);
       }
     };
-
     fetchData();
   }, []);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
   const handleChange = (e) => {
     setNewTicket({ ...newTicket, [e.target.name]: e.target.value });
   };
-  const handleSubmit = () => {
-    setData([...data, newTicket]);
-    setOpen(false);
+
+  const handleSubmit = async () => {
+    try {
+      const docRef = await addDoc(collection(db, "tickets"), newTicket);
+      setData([...data, { id: docRef.id, ...newTicket }]);
+      setOpen(false);
+    } catch (error) {
+      console.error("Error adding ticket:", error);
+    }
   };
+
+  const filteredData = data.filter(ticket =>
+    Object.values(ticket).some(value =>
+      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  );
 
   return (
     <Container>
       <Typography variant="h4" gutterBottom>
         Dashboard
       </Typography>
-      <Button variant="contained" color="primary" onClick={handleOpen}>
-        Create Ticket
-      </Button>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Button variant="contained" color="primary" onClick={handleOpen}>
+          Create Ticket
+        </Button>
+        <TextField
+        className="bg-white rounded-lg h-12 text-xs"
+
+          placeholder="Search..."
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </Box>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Create Ticket</DialogTitle>
         <DialogContent>
-          {data.length > 0 &&
-            Object.keys(data[0]).map((key) => (
-              <TextField
-                key={key}
-                margin="dense"
-                label={key}
-                name={key}
-                fullWidth
-                onChange={handleChange}
-              />
-            ))}
+          {Object.keys(newTicket).map((key) => (
+            <TextField
+              key={key}
+              margin="dense"
+              label={key}
+              name={key}
+              fullWidth
+              onChange={handleChange}
+            />
+          ))}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="secondary">
@@ -90,23 +116,23 @@ export default function Dashboard() {
           </Button>
         </DialogActions>
       </Dialog>
-      {data.length === 0 ? (
-        <Alert severity="error">No data found or failed to load Excel file.</Alert>
+      {filteredData.length === 0 ? (
+        <Alert severity="error">No matching tickets found.</Alert>
       ) : (
-        <TableContainer component={Paper}>
+        <TableContainer className="mt-10" component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
-                {Object.keys(data[0]).map((key) => (
+                {Object.keys(newTicket).map((key) => (
                   <TableCell key={key} sx={{ fontWeight: "bold" }}>{key}</TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.map((row, index) => (
+              {filteredData.map((row, index) => (
                 <TableRow key={index}>
-                  {Object.values(row).map((value, idx) => (
-                    <TableCell key={idx}>{value}</TableCell>
+                  {Object.keys(newTicket).map((key) => (
+                    <TableCell key={key}>{row[key]}</TableCell>
                   ))}
                 </TableRow>
               ))}
