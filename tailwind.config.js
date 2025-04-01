@@ -7,9 +7,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        spaceGrotesk: ["spaceGrotesk", "sans-serif"],
+        'spaceGrotesk': ['SpaceGrotesk', 'sans-serif'],
       },
     },
   },
   plugins: [],
-};
+}
