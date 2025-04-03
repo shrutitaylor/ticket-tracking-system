@@ -28,8 +28,9 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
         </Routes>
-        <Footer />
+        
       </div>
+      <Footer />
     </Router>
   );
 }

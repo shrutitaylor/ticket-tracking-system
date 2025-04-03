@@ -24,6 +24,22 @@ export default function Dashboard() {
     date: "",
   });
 
+  const ticketFields = [
+    "ticketNo",
+    "priority",
+    "status",
+    "name",
+    "contactNo",
+    "device",
+    "issuesDemands",
+    "price",
+    "service",
+    "partsUsed",
+    "called",
+    "notes",
+    "date"
+  ];
+  
   // Function to convert display name to field name
   const getFieldName = (displayName) => {
     const fieldMap = {
@@ -77,12 +93,12 @@ export default function Dashboard() {
   // Function to get status badge style
   const getStatusStyle = (status) => {
     const styles = {
-      "open": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-      "in progress": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-      "to be collected": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-      "closed": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+      "open": "bg-green-100 text-green-800 ",
+      "in progress": "bg-blue-100 text-blue-800 ",
+      "to be collected": "bg-yellow-100 text-yellow-800 ",
+      "closed": "bg-red-100 text-red-800 "
     };
-    return styles[status] || "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+    return styles[status] || "bg-gray-100 text-gray-800 ";
   };
 
   // Function to get the next ticket number
@@ -105,20 +121,28 @@ export default function Dashboard() {
     }
   };
 
+  const fetchData = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "tickets"));
+      const tickets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Sort by date descending (newest on top)
+      tickets.sort((a, b) => {
+        const [dayA, monthA, yearA] = a.date.split("/").map(Number);
+        const [dayB, monthB, yearB] = b.date.split("/").map(Number);
+        const dateA = new Date(yearA, monthA - 1, dayA);
+        const dateB = new Date(yearB, monthB - 1, dayB);
+        return dateB - dateA;
+      });
+      setData(tickets);
+    } catch (error) {
+      console.error("Error loading tickets:", error);
+    }
+  };
+  
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "tickets"));
-        const tickets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // Sort tickets by ticket number
-        tickets.sort((a, b) => parseInt(a.ticketNo) - parseInt(b.ticketNo));
-        setData(tickets);
-      } catch (error) {
-        console.error("Error loading tickets:", error);
-      }
-    };
     fetchData();
   }, []);
+  
 
   const handleDeleteAll = async () => {
     if (window.confirm("Are you sure you want to delete all tickets? This action cannot be undone.")) {
@@ -182,20 +206,22 @@ export default function Dashboard() {
         // Update existing ticket
         const ticketRef = doc(db, "tickets", newTicket.id);
         await updateDoc(ticketRef, newTicket);
-        setData(data.map(ticket => 
-          ticket.id === newTicket.id ? newTicket : ticket
-        ));
       } else {
         // Create new ticket
         const docRef = await addDoc(collection(db, "tickets"), newTicket);
-        setData([...data, { id: docRef.id, ...newTicket }].sort((a, b) => parseInt(a.ticketNo) - parseInt(b.ticketNo)));
       }
+  
+      // Close modal
       setOpen(false);
       setIsUpdateMode(false);
+  
+      // Fetch updated data from Firestore
+      await fetchData();
     } catch (error) {
       console.error("Error saving ticket:", error);
     }
   };
+  
 
   const filteredData = data.filter(ticket =>
     Object.values(ticket).some(value =>
@@ -328,7 +354,7 @@ export default function Dashboard() {
           <table className="min-w-full">
             <thead>
               <tr className="bg-gray-300">
-                {Object.keys(newTicket).map((key) => (
+              {ticketFields.map((key) => (
                   <th key={key} className="px-2 py-3 text-center text-sm font-spaceGrotesk font-medium text-gray-500 uppercase tracking-wider">
                     {getDisplayName(key)}
                   </th>
@@ -341,7 +367,7 @@ export default function Dashboard() {
             <tbody className="divide-y divide-gray-200">
               {filteredData.map((row, index) => (
                 <tr key={index} className="hover:bg-gray-50">
-                  {Object.keys(newTicket).map((key) => (
+                  {ticketFields.map((key) => (
                     <td key={key} className="px-2 text-center items-center py-3 whitespace-nowrap text-md font-spaceGrotesk text-gray-900">
                       {key === "priority" ? (
                         <div className={`w-8 h-8 mx-auto self-align-center rounded-full flex items-center justify-center text-white font-bold ${getPriorityStyle(row[key])}`}>
