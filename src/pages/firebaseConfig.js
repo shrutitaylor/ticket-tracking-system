@@ -1,7 +1,7 @@
 // firebaseConfig.js
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence } from "firebase/auth";
 
 
 const firebaseConfig = {
@@ -17,11 +17,16 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+
 // Export Firebase services
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
-
+// Enable local persistence
+setPersistence(auth, browserLocalPersistence)
+  .then(() => console.log("Persistence enabled"))
+  .catch((error) => console.error("Persistence error:", error));
+  
 // 🔹 Authentication Methods
 export const signUp = (email, password) => createUserWithEmailAndPassword(auth, email, password);
 export const logIn = (email, password) => signInWithEmailAndPassword(auth, email, password);

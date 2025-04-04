@@ -8,6 +8,8 @@ import Login from './pages/login';
 import Footer from './components/footer';
 import Navbar from './components/navbar';
 import './index.css';
+import UsersTable from './pages/users-display';
+import Transactions from './pages/transactions';
 
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
         <Navbar user={user} />
         <Routes>
           <Route path="/" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+          <Route path="/transactions" element={user ? <Transactions /> : <Navigate to="/login" />} />
+          <Route path="/users" element={<UsersTable />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
         </Routes>

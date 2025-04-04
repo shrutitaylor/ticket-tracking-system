@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import navigation
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "./firebaseConfig";
+import { auth, db } from "./firebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -11,14 +12,36 @@ const Signup = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate(); // Initialize navigation
 
+  // const handleSignup = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     await createUserWithEmailAndPassword(auth, email, password);
+  //     alert("Signup successful! Please log in.");
+  //     navigate("/login"); // Redirect to login page
+  //   } catch (err) {
+  //     setError(err.message);
+  //   }
+  // };
+
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+  
+      // Save user to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        email: email,
+        firstName: firstName || "", // get name from a signup form input
+        lastName:lastName,
+        createdAt: new Date(),
+        lastLogin: new Date()
+      });
+  
       alert("Signup successful! Please log in.");
       navigate("/login"); // Redirect to login page
-    } catch (err) {
-      setError(err.message);
+    } catch (error) {
+      console.error("Signup error:", error.message);
     }
   };
   return (

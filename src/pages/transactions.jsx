@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import { db } from "./firebaseConfig";
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc, query, orderBy, limit } from "firebase/firestore";
 
-export default function Dashboard() {
+export default function Transactions() {
   const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -179,17 +179,9 @@ export default function Dashboard() {
       
       setNewTicket({
         ticketNo: nextTicketNo,
+        transactionId:"",
         name: "",
         contactNo: "",
-        device: "",
-        issuesDemands: "",
-        price: "",
-        service: "",
-        partsUsed: "",
-        called: "",
-        notes: "",
-        priority: "",
-        status: "open",
         date: date,
       });
       setIsUpdateMode(false);
@@ -262,7 +254,7 @@ export default function Dashboard() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex  mb-8">
         <h1 className="text-4xl font-spaceGrotesk text-black font-bold">
-          Dashboard
+        Transactions
         </h1>
       </div>
 
@@ -388,7 +380,7 @@ export default function Dashboard() {
                     {getDisplayName(key)}
                   </th>
                 ))}
-                <th className="px-2 py-3 text-left text-center text-sm font-spaceGrotesk font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-2 py-3 text-left text-sm font-spaceGrotesk font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -414,21 +406,19 @@ export default function Dashboard() {
                   <td className="px-2 py-3 whitespace-nowrap text-sm font-spaceGrotesk">
                     <button
                       onClick={() => handleOpen(row)}
-                      className="bg-[#9C795C] mr-2 hover:scale-105 text-white px-3 py-1 rounded-lg transition-colors"
+                      className="bg-[#9C795C] hover:scale-105 text-white px-3 py-1 rounded-lg transition-colors"
                     >
                       Update
                     </button>
-                    <button
-                        onClick={() => handleOpenPayModal(row)}
-                        className={`px-3 py-1 rounded-lg transition-all ${
-                          row.paid ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600 text-white"
-                        }`}
-                        disabled={row.paid === "Cash" || row.paid === "Online"}
-                      >
-                        Pay
-                      </button>
                   </td>
-                 
+                  <td className="px-2 py-3 whitespace-nowrap text-sm font-spaceGrotesk">
+                    <button
+                      onClick={() => handleOpenPayModal(row)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg transition-all"
+                    >
+                      Pay
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
