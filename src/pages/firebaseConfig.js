@@ -23,9 +23,9 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 // Enable local persistence
-setPersistence(auth, browserLocalPersistence)
-  .then(() => console.log("Persistence enabled"))
-  .catch((error) => console.error("Persistence error:", error));
+// setPersistence(auth, browserLocalPersistence)
+//   .then(() => console.log("Persistence enabled"))
+//   .catch((error) => console.error("Persistence error:", error));
   
 // 🔹 Authentication Methods
 export const signUp = (email, password) => createUserWithEmailAndPassword(auth, email, password);

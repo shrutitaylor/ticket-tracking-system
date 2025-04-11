@@ -2,12 +2,14 @@
 import { useState, useEffect } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../pages/firebaseConfig";
-import logo from "../assets/images/iolabs-logo.webp";
+import logo from "../assets/images/iolabs-black.png";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
 
 const Navbar = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const { firstName } = useUser();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -32,7 +34,7 @@ const Navbar = () => {
             {user ? (
                <>
                <li className="text-gray-900 font-bold pt-2">
-                 {user.displayName || user.email} {/* Show name or email */}
+                 {firstName} {/* Show name or email */}
                </li>
                <li className="pt-2">
                  <a href="/" className="text-gray-900 hover:bg-black hover:text-white rounded-lg px-4 py-2 ">dashboard</a>

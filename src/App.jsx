@@ -10,32 +10,50 @@ import Navbar from './components/navbar';
 import './index.css';
 import UsersTable from './pages/users-display';
 import Transactions from './pages/transactions';
+import { UserProvider } from './contexts/UserContext';
+import { LoaderProvider } from './contexts/LoaderContext';
+import Loader from './components/loader';
+import Layout from './components/layout';
+
 
 
 function App() {
-    const [user, setUser] = useState(null);
-  
-    useEffect(() => {
-      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        setUser(currentUser);
-      });
-      return () => unsubscribe();
-    }, []);
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true); // Add loading state
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false); // Mark auth check complete
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+
   return (
-    <Router>
-      <div className='font-spaceGrotesk min-h-screen flex flex-col'>
-        <Navbar user={user} />
-        <Routes>
-          <Route path="/" element={user ? <Dashboard /> : <Navigate to="/login" />} />
-          <Route path="/transactions" element={user ? <Transactions /> : <Navigate to="/login" />} />
-          <Route path="/users" element={<UsersTable />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-        </Routes>
-        
-      </div>
-      <Footer />
-    </Router>
+
+     <LoaderProvider>
+      <UserProvider>
+        <Router>
+          <Loader />
+          <Navbar user={user} />
+          <Layout>
+            <Routes>
+              <Route path="/" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+              <Route path="/transactions" element={user ? <Transactions /> : <Navigate to="/login" />} />
+              <Route path="/users" element={<UsersTable />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+            </Routes>
+          </Layout>
+          <Footer />
+        </Router>
+      </UserProvider>
+      </LoaderProvider>
+
+
+
   );
 }
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { db } from "./firebaseConfig";
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc, query, orderBy, limit } from "firebase/firestore";
+import { useLoader } from "../contexts/LoaderContext";
 
 export default function Dashboard() {
   const [data, setData] = useState([]);
@@ -10,6 +11,7 @@ export default function Dashboard() {
   const [isUpdateMode, setIsUpdateMode] = useState(false);
   const [payModalOpen, setPayModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
+
   const [newTicket, setNewTicket] = useState({
     ticketNo: "",
     priority: "",
@@ -130,6 +132,7 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     try {
+
       const querySnapshot = await getDocs(collection(db, "tickets"));
       const tickets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       // Sort by date descending (newest on top)
