@@ -11,6 +11,11 @@ export default function Dashboard() {
   const [isUpdateMode, setIsUpdateMode] = useState(false);
   const [payModalOpen, setPayModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ticketsPerPage = 20;
+  
+
+
 
   const [newTicket, setNewTicket] = useState({
     ticketNo: "",
@@ -30,22 +35,145 @@ export default function Dashboard() {
   });
 
   const ticketFields = [
-    "ticketNo",
+    
     "priority",
     "status",
     "name",
     "contactNo",
     "device",
-    "issuesDemands",
+    "issues",
     "price",
-    "service",
-    "partsUsed",
-    "called",
-    "notes",
-    "date",
-    "paid"
+    "date"
 
   ];
+ 
+  const phoneFields = [
+    // iPhones
+    "iPhone 15 Pro Max",
+    "iPhone 15 Pro",
+    "iPhone 15 Plus",
+    "iPhone 15",
+    "iPhone 14 Pro Max",
+    "iPhone 14 Pro",
+    "iPhone 14 Plus",
+    "iPhone 14",
+    "iPhone 13 Pro Max",
+    "iPhone 13 Pro",
+    "iPhone 13",
+    "iPhone 13 Mini",
+    "iPhone 12 Pro Max",
+    "iPhone 12 Pro",
+    "iPhone 12",
+    "iPhone 12 Mini",
+    "iPhone 11 Pro Max",
+    "iPhone 11 Pro",
+    "iPhone 11",
+    "iPhone XR",
+    "iPhone XS Max",
+    "iPhone XS",
+    "iPhone X",
+    "iPhone 8 Plus",
+    "iPhone 8",
+    "iPhone 7 Plus",
+    "iPhone 7",
+    "iPhone SE (2nd Gen)",
+    "iPhone SE (3rd Gen)",
+  
+    // Samsung Galaxy S series
+    "Samsung Galaxy S24 Ultra",
+    "Samsung Galaxy S24+",
+    "Samsung Galaxy S24",
+    "Samsung Galaxy S23 Ultra",
+    "Samsung Galaxy S23+",
+    "Samsung Galaxy S23",
+    "Samsung Galaxy S22 Ultra",
+    "Samsung Galaxy S22+",
+    "Samsung Galaxy S22",
+    "Samsung Galaxy S21 Ultra",
+    "Samsung Galaxy S21+",
+    "Samsung Galaxy S21",
+    "Samsung Galaxy S20 Ultra",
+    "Samsung Galaxy S20+",
+    "Samsung Galaxy S20",
+    
+    // Samsung Galaxy Note series
+    "Samsung Galaxy Note 20 Ultra",
+    "Samsung Galaxy Note 20",
+    "Samsung Galaxy Note 10+",
+    "Samsung Galaxy Note 10",
+  
+    // Samsung Galaxy A series (popular mid-range)
+    "Samsung Galaxy A74",
+    "Samsung Galaxy A73",
+    "Samsung Galaxy A72",
+    "Samsung Galaxy A54",
+    "Samsung Galaxy A53",
+    "Samsung Galaxy A52",
+    "Samsung Galaxy A34",
+    "Samsung Galaxy A33",
+    "Samsung Galaxy A32",
+  
+    // Samsung Galaxy Z series (foldables)
+    "Samsung Galaxy Z Fold 5",
+    "Samsung Galaxy Z Fold 4",
+    "Samsung Galaxy Z Flip 5",
+    "Samsung Galaxy Z Flip 4"
+  ];
+  
+  const mapCSVRowToTicket = (row) => {
+    const rawDate = row["date"];
+    const formattedDate =
+      typeof rawDate === "string"
+        ? rawDate
+        : XLSX.SSF.format("dd/mm/yyyy", rawDate); // handle Excel date numbers
+  
+    return {
+      ticketNo: row["ticketNo"] || "",
+      priority: row["priority"] || "",
+      status: row["status"] || "open",
+      name: row["name"] || "",
+      contactNo: row["contactNo"] || "",
+      device: row["device"] || "",
+      issues: row["issues"] || "",
+      price: row["price"] || "",
+      service: row["service"] || "",
+      partsUsed: row["partsUsed"] || "",
+      called: row["called"] || "",
+      notes: row["notes"] || "",
+      paid: row['status'] == "Collected Device" ? "paid" :  "No",
+      date: formattedDate || new Date().toLocaleDateString("en-GB"),
+    };
+  };
+
+  const handleCSVUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+  
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const data = new Uint8Array(event.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  
+      const tickets = jsonData.map(mapCSVRowToTicket);
+  
+      try {
+        const promises = tickets.map((ticket) => addDoc(collection(db, "tickets"), ticket));
+        await Promise.all(promises);
+        alert("Tickets imported successfully!");
+        fetchData(); // Refresh UI
+      } catch (err) {
+        console.error("Error importing tickets:", err);
+        alert("Failed to import some or all tickets.");
+      }
+    };
+  
+    reader.readAsArrayBuffer(file);
+  };
+  
+  
   
   // Function to convert display name to field name
   const getFieldName = (displayName) => {
@@ -137,12 +265,23 @@ export default function Dashboard() {
       const tickets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       // Sort by date descending (newest on top)
       tickets.sort((a, b) => {
-        const [dayA, monthA, yearA] = a.date.split("/").map(Number);
-        const [dayB, monthB, yearB] = b.date.split("/").map(Number);
-        const dateA = new Date(yearA, monthA - 1, dayA);
-        const dateB = new Date(yearB, monthB - 1, dayB);
-        return dateB - dateA;
+        const parseDate = (d) => {
+          if (typeof d === "string") {
+            const [day, month, year] = d.split("/").map(Number);
+            return new Date(year, month - 1, day);
+          } else if (d instanceof Date) {
+            return d;
+          } else if (d?.seconds) {
+            // Firestore Timestamp object
+            return new Date(d.seconds * 1000);
+          } else {
+            return new Date(0); // Fallback to epoch if unknown
+          }
+        };
+      
+        return parseDate(b.date) - parseDate(a.date);
       });
+      
       setData(tickets);
     } catch (error) {
       console.error("Error loading tickets:", error);
@@ -260,6 +399,9 @@ export default function Dashboard() {
       value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
+  const indexOfLastTicket = currentPage * ticketsPerPage;
+  const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
+  const currentTickets = filteredData.slice(indexOfFirstTicket, indexOfLastTicket);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -283,6 +425,15 @@ export default function Dashboard() {
           >
             Delete All Tickets
           </button>
+          <label className="bg-green-600 hover:scale-105 text-white px-4 py-2 rounded-lg font-spaceGrotesk cursor-pointer">
+            Import CSV
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleCSVUpload}
+              className="hidden"
+            />
+          </label>
         </div>
         <div class="relative hidden md:block">
             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -343,6 +494,21 @@ export default function Dashboard() {
                       <option value="to be collected">To Be Collected</option>
                       <option value="closed">Closed</option>
                     </select>
+                  ) : key === "device" ? (
+                    <>
+                      <input
+                        list="device-options"
+                        name={getDisplayName(key)}
+                        value={value}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk"
+                      />
+                      <datalist className="max-h-[300px]" id="device-options">
+                        {phoneFields.map((phone) => (
+                          <option key={phone} value={phone} />
+                        ))}
+                      </datalist>
+                    </>
                   ) : (
                     <input
                       type="text"
@@ -397,7 +563,7 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredData.map((row, index) => (
+              {currentTickets.map((row, index) => (
                 <tr key={index} className="hover:bg-gray-50">
                   {ticketFields.map((key) => (
                     <td key={key} className="px-2 text-center items-center py-3 whitespace-nowrap text-md font-spaceGrotesk text-gray-900">
@@ -419,12 +585,12 @@ export default function Dashboard() {
                       onClick={() => handleOpen(row)}
                       className="bg-[#9C795C] mr-2 hover:scale-105 text-white px-3 py-1 rounded-lg transition-colors"
                     >
-                      Update
+                      View
                     </button>
                     <button
                         onClick={() => handleOpenPayModal(row)}
                         className={`px-3 py-1 rounded-lg transition-all ${
-                          row.paid ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600 text-white"
+                          row.paid =="paid" ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600 text-white"
                         }`}
                         disabled={row.paid === "Cash" || row.paid === "Online"}
                       >
@@ -437,7 +603,34 @@ export default function Dashboard() {
             </tbody>
           </table>
         </div>
+
       )}
+      <div className="flex justify-center items-center mt-4 gap-4">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className="px-3 py-1 bg-gray-300 hover:bg-gray-400 rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+
+        <span className="font-spaceGrotesk text-gray-700">
+          Page {currentPage} of {Math.ceil(filteredData.length / ticketsPerPage)}
+        </span>
+
+        <button
+          onClick={() =>
+            setCurrentPage((prev) =>
+              prev < Math.ceil(filteredData.length / ticketsPerPage) ? prev + 1 : prev
+            )
+          }
+          disabled={currentPage === Math.ceil(filteredData.length / ticketsPerPage)}
+          className="px-3 py-1 bg-gray-300 hover:bg-gray-400 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+
       {payModalOpen && selectedTicket && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
               <div className="bg-white rounded-lg p-6 w-full max-w-md text-center">
