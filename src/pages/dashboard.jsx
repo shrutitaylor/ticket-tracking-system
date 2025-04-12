@@ -394,20 +394,26 @@ export default function Dashboard() {
     }
   };
     
-  const filteredData = data.filter(ticket =>
-    Object.values(ticket).some(value =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    )
+  // 1. Apply search to the full data
+const filteredData = data.filter(ticket => {
+  const query = searchQuery.toLowerCase();
+  return Object.values(ticket).some(
+    value =>
+      typeof value === "string" &&
+      value.toLowerCase().includes(query)
   );
-  const indexOfLastTicket = currentPage * ticketsPerPage;
-  const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
-  const currentTickets = filteredData.slice(indexOfFirstTicket, indexOfLastTicket);
+});
+
+// 2. Paginate the filtered data
+const indexOfLastTicket = currentPage * ticketsPerPage;
+const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
+const currentTickets = filteredData.slice(indexOfFirstTicket, indexOfLastTicket);
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex  mb-8">
-        <h1 className="text-4xl font-spaceGrotesk text-black font-bold">
-          Dashboard
+        <h1 className="text-4xl font-aoMono text-black font-bold">
+          DASHBOARD
         </h1>
       </div>
 
@@ -453,13 +459,14 @@ export default function Dashboard() {
 
       {/* Modal */}
       {open && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white mt-28 rounded-lg p-6 w-full max-w-2xl">
             <h2 className="text-2xl font-spaceGrotesk mb-4">
               {isUpdateMode ? "Update Ticket" : "Create Ticket"}
             </h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 2xl:grid-cols-2 gap-4">
               {Object.entries(newTicket).map(([key, value]) => (
+                key!== "ticketNo" &&
                 <div key={key} className="col-span-1">
                   <label className="block text-sm font-spaceGrotesk mb-1">{getDisplayName(key)}</label>
                   {key === "priority" ? (
@@ -609,7 +616,7 @@ export default function Dashboard() {
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className="px-3 py-1 bg-gray-300 hover:bg-gray-400 rounded disabled:opacity-50"
+          className="px-3 py-1  bg-gray-300 hover:bg-gray-400 rounded disabled:opacity-50"
         >
           Previous
         </button>

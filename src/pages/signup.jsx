@@ -45,7 +45,7 @@ const Signup = () => {
     }
   };
   return (
-    <div className="flex flex-col items-center min-h-[80vh] justify-center">
+    <div className="flex flex-col font-spaceGrotesk items-center min-h-[80vh] justify-center">
       <form onSubmit={handleSignup} className="flex flex-col shadow-lg rounded-lg p-10 mt-24 min-w-96">
         <h1 className="text-2xl font-bold text-left">Signup</h1>
 
@@ -61,7 +61,7 @@ const Signup = () => {
         <label htmlFor="password" className="mt-4 text-left">Password</label>
         <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-lg p-2 bg-gray-200" />
 
-        <button type="submit" className="rounded-lg mt-10 p-2 bg-black text-white hover:scale-105 transition-all duration-300">
+        <button type="submit" className="rounded-lg mt-10 font-aoMono uppercase pt-3 pb-2 bg-black text-white hover:scale-105 transition-all duration-300">
           Signup
         </button>
       </form>

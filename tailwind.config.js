@@ -8,6 +8,7 @@ export default {
     extend: {
       fontFamily: {
         'spaceGrotesk': ['SpaceGrotesk', 'sans-serif'],
+        'aoMono':['AOMono','sans-serif']
       },
     },
   },
