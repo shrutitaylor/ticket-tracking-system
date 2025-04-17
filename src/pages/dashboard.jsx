@@ -4,6 +4,7 @@ import { db } from "./firebaseConfig";
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc, query, orderBy, limit } from "firebase/firestore";
 import { useLoader } from "../contexts/LoaderContext";
 import { ArrowDownIcon, ArrowUpIcon, BarsArrowDownIcon, BarsArrowUpIcon } from "@heroicons/react/16/solid";
+import FilteredExport from "./exportData";
 
 
 export default function Dashboard() {
@@ -15,6 +16,7 @@ export default function Dashboard() {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const ticketsPerPage = 20;
+  const [exportData, setExportData] = useState(false)
   
 
 
@@ -45,6 +47,21 @@ export default function Dashboard() {
     "device",
     "issues",
     "price",
+    "date"
+
+  ];
+  const updateTicketFields = [
+    "name",
+    "contactNo",
+    "device",
+    "issuesDemands",
+    "price",
+    "service",
+    "partsUsed",
+    "called",
+    "notes",
+    "priority",
+    "status",
     "date"
 
   ];
@@ -484,6 +501,14 @@ const paginatedTickets = sortedTickets.slice(
               className="hidden"
             />
           </label>
+          <button
+            onClick={() => setExportData(!exportData)}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
+          >
+            Export Data
+          </button>
+          {exportData ? <FilteredExport/>:null}
+          
         </div>
         <div class="relative hidden md:block">
             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -503,14 +528,15 @@ const paginatedTickets = sortedTickets.slice(
 
       {/* Modal */}
       {open && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 font-spaceGrotesk z-50 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white mt-28 rounded-lg p-6 w-full max-w-2xl">
             <h2 className="text-2xl font-spaceGrotesk mb-4">
               {isUpdateMode ? "Update Ticket" : "Create Ticket"}
             </h2>
             <div className="grid grid-cols-3 2xl:grid-cols-2 gap-4">
-              {Object.entries(newTicket).map(([key, value]) => (
-                key!== "ticketNo" &&
+            {updateTicketFields.map((key) => {
+              const value = newTicket[key];
+              return (
                 <div key={key} className="col-span-1">
                   <label className="block text-sm font-spaceGrotesk mb-1">{getDisplayName(key)}</label>
                   {key === "priority" ? (
@@ -540,9 +566,9 @@ const paginatedTickets = sortedTickets.slice(
                       onChange={handleChange}
                       className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk"
                     >
-                     {Object.entries(styles).map(([key, value]) => (
-                      <option value={key}>{key}</option> 
-                     ))}
+                    {Object.entries(styles).map(([statusKey]) => (
+                      <option key={statusKey} value={statusKey}>{statusKey}</option> 
+                    ))}
                     </select>
                   ) : key === "device" ? (
                     <>
@@ -553,7 +579,7 @@ const paginatedTickets = sortedTickets.slice(
                         onChange={handleChange}
                         className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk"
                       />
-                      <datalist className="max-h-[300px]" id="device-options">
+                      <datalist id="device-options">
                         {phoneFields.map((phone) => (
                           <option key={phone} value={phone} />
                         ))}
@@ -572,7 +598,9 @@ const paginatedTickets = sortedTickets.slice(
                     />
                   )}
                 </div>
-              ))}
+              );
+            })}
+
             </div>
             <div className="flex justify-end gap-4 mt-6">
               <button
