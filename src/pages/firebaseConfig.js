@@ -3,16 +3,16 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
-
 const firebaseConfig = {
-    apiKey: "AIzaSyB-LecmDzXOmxriNlvTkEG_JSg43lIax0c",
-    authDomain: "ticket-management-92e9d.firebaseapp.com",
-    projectId: "ticket-management-92e9d",
-    storageBucket: "ticket-management-92e9d.appspot.com",
-    messagingSenderId: "642624109444",
-    appId: "1:642624109444:web:7d09c4d9f92db340b53bd1",
-    measurementId: "G-9MY2MW4M98"
-};
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  };
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
