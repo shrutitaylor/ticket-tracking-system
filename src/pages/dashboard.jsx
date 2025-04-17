@@ -207,7 +207,7 @@ export default function Dashboard() {
       "name": "Name",
       "contactNo": "Contact No.",
       "device": "Device",
-      "issuesDemands": "Issues/Demands",
+      "issues": "Issues",
       "price": "$$$",
       "service": "Service",
       "partsUsed": "Parts Used",
@@ -230,13 +230,23 @@ export default function Dashboard() {
   };
 
   // Function to get status badge style
+  const styles = {
+    "Collected Device": "bg-green-800 text-green-100 ",
+    "Not Fixable / Closed": "bg-blue-100 text-blue-800 ",
+    "Waiting for Device": "bg-violet-100 text-violet-800 ",
+    "Waiting for Parts": "bg-violet-100 text-violet-800 ",
+    "Waiting for Customer": "bg-violet-100 text-violet-800 ",
+    "Sent to Mike": "bg-violet-800 text-violet-100 ",
+    "Return with update": "bg-blue-100 text-blue-800 ",
+    "Under Pending": "bg-yellow-100 text-yellow-800 ",
+    "EMERGENCY": "bg-red-500 text-red-100 ",
+    "Repaired, informed": "bg-green-100 text-green-800 ",
+    "Pending Payment": "bg-amber-100 text-amber-800 ",
+    "Send Invoice": "bg-pink-100 text-pink-800 ",
+    "Refund": "bg-amber-800 text-amber-100 ",
+    "Warranty": "bg-blue-800 text-blue-100 ",
+  };
   const getStatusStyle = (status) => {
-    const styles = {
-      "open": "bg-green-100 text-green-800 ",
-      "in progress": "bg-blue-100 text-blue-800 ",
-      "to be collected": "bg-yellow-100 text-yellow-800 ",
-      "closed": "bg-red-100 text-red-800 "
-    };
     return styles[status] || "bg-gray-100 text-gray-800 ";
   };
 
@@ -530,10 +540,9 @@ const paginatedTickets = sortedTickets.slice(
                       onChange={handleChange}
                       className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk"
                     >
-                      <option value="open">Open</option>
-                      <option value="in progress">In Progress</option>
-                      <option value="to be collected">To Be Collected</option>
-                      <option value="closed">Closed</option>
+                     {Object.entries(styles).map(([key, value]) => (
+                      <option value={key}>{key}</option> 
+                     ))}
                     </select>
                   ) : key === "device" ? (
                     <>
