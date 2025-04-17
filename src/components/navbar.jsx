@@ -22,6 +22,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     await signOut(auth);
     navigate("/login"); // Redirect to login page
+    
   };
 
   const toggleDropdown = () => {
@@ -53,7 +54,7 @@ const Navbar = () => {
 
                 {/* Dropdown menu */}
                 {isDropdownOpen && (
-                  <div className="z-100 absolute w-96 right-10 top-14  my-4 text-base list-none bg-gray-100 divide-y divide-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
+                  <div className="z-100 absolute w-96 right-10 top-14  my-4 text-base list-none bg-gray-100 divide-y divide-gray-300 rounded-lg shadow-sm ">
                     <div className="px-4 py-3">
                       <span className="block text-md uppercase text-gray-900 dark:text-white">
                         {firstName}
@@ -66,7 +67,8 @@ const Navbar = () => {
                       <li>
                         <a
                           href="/"
-                          className="block px-4 py-2 uppercase text-sm text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                          className="block px-4 py-2 uppercase text-sm text-gray-700 hover:bg-gray-200 "
+                          onClick={toggleDropdown} 
                         >
                           Dashboard
                         </a>
@@ -74,7 +76,8 @@ const Navbar = () => {
                       <li>
                         <a
                           href="/transactions"
-                          className="block px-4 py-2 uppercase  text-sm text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                          className="block px-4 py-2 uppercase  text-sm text-gray-700 hover:bg-gray-200 "
+                          onClick={toggleDropdown} 
                         >
                           Transactions
                         </a>
@@ -83,7 +86,8 @@ const Navbar = () => {
                         <li>
                           <a
                             href="/users"
-                            className="block px-4 py-2 uppercase text-sm text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                            className="block px-4 py-2 uppercase text-sm text-gray-700 hover:bg-gray-200 "
+                            onClick={toggleDropdown} 
                           >
                             Users
                           </a>
@@ -92,7 +96,7 @@ const Navbar = () => {
                       <li>
                         <button
                           onClick={handleLogout}
-                          className="block w-full uppercase text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                          className="block w-full uppercase text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 "
                         >
                           Sign out
                         </button>

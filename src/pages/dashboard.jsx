@@ -3,6 +3,8 @@ import * as XLSX from "xlsx";
 import { db } from "./firebaseConfig";
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc, query, orderBy, limit } from "firebase/firestore";
 import { useLoader } from "../contexts/LoaderContext";
+import { ArrowDownIcon, ArrowUpIcon, BarsArrowDownIcon, BarsArrowUpIcon } from "@heroicons/react/16/solid";
+
 
 export default function Dashboard() {
   const [data, setData] = useState([]);
@@ -409,6 +411,38 @@ const indexOfLastTicket = currentPage * ticketsPerPage;
 const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
 const currentTickets = filteredData.slice(indexOfFirstTicket, indexOfLastTicket);
 
+//Sort 
+const [sortConfig, setSortConfig] = useState({ key: '', direction: 'asc' });
+
+const handleSort = (key) => {
+  let direction = 'asc';
+  if (sortConfig.key === key && sortConfig.direction === 'asc') {
+    direction = 'desc';
+  }
+  setSortConfig({ key, direction });
+};
+
+const sortedTickets = data.sort((a, b) => {
+  if (!sortConfig.key) return 0;
+  const aVal = a[sortConfig.key];
+  const bVal = b[sortConfig.key];
+
+  if (typeof aVal === 'number' && typeof bVal === 'number') {
+    return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+  }
+
+  return sortConfig.direction === 'asc'
+    ? String(aVal).localeCompare(String(bVal))
+    : String(bVal).localeCompare(String(aVal));
+});
+
+const paginatedTickets = sortedTickets.slice(
+  (currentPage - 1) * ticketsPerPage,
+  currentPage * ticketsPerPage
+);
+
+
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex  mb-8">
@@ -560,9 +594,20 @@ const currentTickets = filteredData.slice(indexOfFirstTicket, indexOfLastTicket)
             <thead>
               <tr className="bg-gray-300">
               {ticketFields.map((key) => (
-                  <th key={key} className="px-2 py-3 text-center text-sm font-spaceGrotesk font-medium text-gray-500 uppercase tracking-wider">
-                    {getDisplayName(key)}
-                  </th>
+                <>
+                <th key={key} 
+                className="cursor-pointer px-2 py-3 text-center text-sm font-spaceGrotesk font-medium text-gray-500 uppercase tracking-wider"
+                onClick={() => handleSort(key)}>
+                {getDisplayName(key)}
+                    {sortConfig.key === key && (
+                        sortConfig.direction === 'asc' ? (
+                          <BarsArrowUpIcon className="w-4 h-4 inline ml-1" />
+                        ) : (
+                          <BarsArrowDownIcon className="w-4 h-4 inline ml-1" />
+                        )
+                      )}
+                </th>
+                 </>
                 ))}
                 <th className="px-2 py-3 text-left text-center text-sm font-spaceGrotesk font-medium text-gray-500 uppercase tracking-wider">
                   Actions
