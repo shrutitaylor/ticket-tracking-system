@@ -486,12 +486,12 @@ const paginatedTickets = sortedTickets.slice(
           >
             Create Ticket
           </button>
-          <button
+          {/* <button
             onClick={handleDeleteAll}
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
           >
             Delete All Tickets
-          </button>
+          </button> */}
           <label className="bg-green-600 hover:scale-105 text-white px-4 py-2 rounded-lg font-spaceGrotesk cursor-pointer">
             Import CSV
             <input
@@ -503,7 +503,7 @@ const paginatedTickets = sortedTickets.slice(
           </label>
           <button
             onClick={() => setExportData(!exportData)}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
           >
             Export Data
           </button>
