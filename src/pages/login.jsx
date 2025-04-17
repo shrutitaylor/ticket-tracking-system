@@ -15,32 +15,36 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError(null);
+    setLoading(true);
+  
     try {
-
+      // Step 1: Sign in via Firebase Auth
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
   
-      let name = "";
-      try {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
+      // Step 2: Check if user exists in the Firestore 'users' collection
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
   
-        if (userDocSnap.exists()) {
-          name = userDocSnap.data().firstName || "";
-          setFirstName(name);
-          // alert(`Welcome, ${name}!`);
-        } else {
-          console.error("User document not found");
-          setError("User profile not found.");
-        }
-      } catch (err) {
-        console.error("Error fetching user data:", err);
-        setError("Failed to retrieve user info.");
+      if (userDocSnap.exists()) {
+        const name = userDocSnap.data().firstName || "";
+        setFirstName(name);
+        setLoading(false);
+      } else {
+        // Step 3: If no Firestore profile, log them out and show error
+        await auth.signOut();
+        console.warn("User authenticated but not found in Firestore users collection.");
+        setError("Access denied. User not registered in the system.");
+        setLoading(false);
       }
+  
     } catch (err) {
       setError(err.message);
+      setLoading(false);
     }
   };
+  
 
   return (
     <div className="flex flex-col font-spaceGrotesk items-center min-h-[80vh] justify-center ">

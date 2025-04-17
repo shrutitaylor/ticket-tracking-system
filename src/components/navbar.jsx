@@ -73,7 +73,7 @@ const Navbar = () => {
                           Dashboard
                         </a>
                       </li>
-                      <li>
+                      {/* <li>
                         <a
                           href="/transactions"
                           className="block px-4 py-2 uppercase  text-sm text-gray-700 hover:bg-gray-200 "
@@ -81,7 +81,7 @@ const Navbar = () => {
                         >
                           Transactions
                         </a>
-                      </li>
+                      </li> */}
                       {user.email === "iolabs.au.ops@gmail.com" && (
                         <li>
                           <a
