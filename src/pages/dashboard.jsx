@@ -142,7 +142,7 @@ export default function Dashboard() {
       partsUsed: row["partsUsed"] || "",
       called: row["called"] || "",
       notes: row["notes"] || "",
-      paid: row['status'] == "Collected Device" ? "paid" :  "No",
+      paid: row['status'] == "Collected Device" ? "Card" :  "No",
       date: formattedDate || new Date().toLocaleDateString("en-GB"),
     };
   };
@@ -395,7 +395,7 @@ export default function Dashboard() {
       const ticketRef = doc(db, "tickets", selectedTicket.id);
       await updateDoc(ticketRef, {
         paid: method,
-        status: method === "Cash" ? "closed" : selectedTicket.status, // Only close if paid by Cash
+        status: "Collected Device" , // Only close if paid by Cash or card
       });
   
       setPayModalOpen(false);
@@ -633,7 +633,7 @@ const paginatedTickets = sortedTickets.slice(
                           {row[key]}
                         </div>
                       ) : key === "status" ? (
-                        <span className={`text-sm font-medium px-2.5 py-0.5 rounded-sm ${getStatusStyle(row[key])}`}>
+                        <span className={`text-sm font-medium px-2.5 py-0.5 rounded-full ${getStatusStyle(row[key])}`}>
                           {row[key]}
                         </span>
                       ) : (
@@ -649,9 +649,9 @@ const paginatedTickets = sortedTickets.slice(
                       View
                     </button>
                     <button
-                        onClick={() => handleOpenPayModal(row)}
+                        onClick={() => row.paid !== "Cash" || row.paid !== "Online"? handleOpenPayModal(row):null}
                         className={`px-3 py-1 rounded-lg transition-all ${
-                          row.paid =="paid" ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600 text-white"
+                          row.paid =="Cash" || row.paid =="Online"  ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600 text-white"
                         }`}
                         disabled={row.paid === "Cash" || row.paid === "Online"}
                       >
@@ -693,19 +693,19 @@ const paginatedTickets = sortedTickets.slice(
       </div>
 
       {payModalOpen && selectedTicket && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black font-aoMono uppercase bg-opacity-50 flex items-center justify-center">
               <div className="bg-white rounded-lg p-6 w-full max-w-md text-center">
                 <h2 className="text-xl font-bold mb-4">Select Payment Method</h2>
                 <div className="flex justify-around">
                   <button
                     onClick={() => handlePayment("Cash")}
-                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
+                    className="bg-green-500 hover:bg-green-600 uppercase text-white px-4 pt-1.5 rounded-lg"
                   >
                     Pay by Cash
                   </button>
                   <button
                     onClick={() => handlePayment("Online")}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                    className="bg-blue-500 hover:bg-blue-600 uppercase text-white px-4 pt-1.5 rounded-lg"
                   >
                     Pay by Card
                   </button>
