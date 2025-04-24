@@ -29,7 +29,7 @@ const Signup = () => {
           lastLogin: new Date()
         });
     
-        alert("Signup successful! Please log in.");
+        alert("Signup successful!");
         navigate("/login"); // Redirect to login page
 
       }else{
