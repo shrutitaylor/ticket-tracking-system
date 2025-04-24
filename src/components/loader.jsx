@@ -13,11 +13,10 @@ const Loader = () => {
     <StyledWrapper>
       <div className="loader">
         <div className="box">
-          <div className="logo p-1">
+          <div className="logo">
             <img src={logo} />
           </div>
         </div>
-        <div className="box" />
         <div className="box" />
         <div className="box" />
         <div className="box" />
@@ -53,33 +52,30 @@ const StyledWrapper = styled.div`
     animation: ripple var(--duration) infinite ease-in-out;
   }
 
-  .loader .box:nth-child(1) {
-    inset: 40%;
-    z-index: 99;
-  }
+  
 
-  .loader .box:nth-child(2) {
+  .loader .box:nth-child(1) {
     inset: 30%;
     z-index: 98;
     border-color: rgba(100, 100, 100, 0.8);
     animation-delay: 0.2s;
   }
 
-  .loader .box:nth-child(3) {
+  .loader .box:nth-child(2) {
     inset: 20%;
     z-index: 97;
     border-color: rgba(100, 100, 100, 0.6);
     animation-delay: 0.4s;
   }
 
-  .loader .box:nth-child(4) {
+  .loader .box:nth-child(3) {
     inset: 10%;
     z-index: 96;
     border-color: rgba(100, 100, 100, 0.4);
     animation-delay: 0.6s;
   }
 
-  .loader .box:nth-child(5) {
+  .loader .box:nth-child(4) {
     inset: 0%;
     z-index: 95;
     border-color: rgba(100, 100, 100, 0.2);
@@ -91,7 +87,7 @@ const StyledWrapper = styled.div`
     inset: 0;
     display: grid;
     place-content: center;
-    padding: 30%;
+    padding: 35%;
   }
 
   .loader .logo svg {
