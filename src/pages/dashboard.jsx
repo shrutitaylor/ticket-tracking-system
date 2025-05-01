@@ -256,7 +256,7 @@ export default function Dashboard() {
     "Waiting for Parts": "bg-violet-100 text-violet-800 ",
     "Waiting for Customer": "bg-violet-100 text-violet-800 ",
     "Sent to Mike": "bg-violet-800 text-violet-100 ",
-    "Return with update": "bg-blue-100 text-blue-800 ",
+    "Return with update": "bg-red-600 text-red-100 ",
     "Under Pending": "bg-yellow-100 text-yellow-800 ",
     "EMERGENCY": "bg-red-500 text-red-100 ",
     "Repaired, informed": "bg-green-100 text-green-800 ",
