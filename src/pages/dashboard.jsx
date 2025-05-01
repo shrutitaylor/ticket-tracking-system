@@ -3,8 +3,10 @@ import * as XLSX from "xlsx";
 import { db } from "./firebaseConfig";
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc, query, orderBy, limit } from "firebase/firestore";
 import { useLoader } from "../contexts/LoaderContext";
-import { ArrowDownIcon, ArrowUpIcon, BarsArrowDownIcon, BarsArrowUpIcon } from "@heroicons/react/16/solid";
+import { ArrowDownIcon, ArrowDownTrayIcon, ArrowPathIcon, ArrowPathRoundedSquareIcon, ArrowUpIcon, BarsArrowDownIcon, BarsArrowUpIcon, FunnelIcon } from "@heroicons/react/16/solid";
 import FilteredExport from "./exportData";
+import { ArrowUturnLeftIcon } from "@heroicons/react/20/solid";
+import { Tooltip } from "@mui/material";
 
 
 export default function Dashboard() {
@@ -28,7 +30,7 @@ export default function Dashboard() {
     name: "",
     contactNo: "",
     device: "",
-    issuesDemands: "",
+    issues: "",
     price: "",
     service: "",
     partsUsed: "",
@@ -54,7 +56,7 @@ export default function Dashboard() {
     "name",
     "contactNo",
     "device",
-    "issuesDemands",
+    "issues",
     "price",
     "service",
     "partsUsed",
@@ -547,21 +549,40 @@ const handleReset = () => {
               className="hidden"
             />
           </label>
+          <div className="relative group">
           <button
             onClick={() => setExportData(!exportData)}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
+            className="bg-blue-500 hover:bg-blue-600 text-white p-2.5 rounded-lg font-spaceGrotesk transition-colors"
           >
-            Export Data
+            <ArrowDownTrayIcon height={20} width={20} />
+            <span className="absolute z-100 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+             Export CSV
+            </span>
           </button>
+          </div>
+          <div className="relative group">
           <button
             onClick={handleSortActive}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="p-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-spaceGrotesk"
           >
-            Active
+            <FunnelIcon height={19} width={19} />
+            <span className="absolute z-100 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+              Active filter
+            </span>
           </button>
-          <button onClick={handleReset} className="bg-gray-500 text-white px-4 py-1 rounded">
-            Reset
+          </div>
+          <div className="relative group">
+          <button
+            onClick={handleReset}
+            className="bg-gray-500 p-2.5 text-white rounded-lg font-spaceGrotesk"
+            title="Reset to default"
+          >
+            <ArrowPathRoundedSquareIcon height={20} width={20} />
+            <span className="absolute z-100 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+              Reset table
+            </span>
           </button>
+          </div>
           {exportData ? <FilteredExport/>:null}
           
         </div>
