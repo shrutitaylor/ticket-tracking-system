@@ -312,6 +312,7 @@ export default function Dashboard() {
       });
       
       setData(tickets);
+      setOriginalData(tickets)
     } catch (error) {
       console.error("Error loading tickets:", error);
     }
@@ -467,7 +468,52 @@ const paginatedTickets = sortedTickets.slice(
   (currentPage - 1) * ticketsPerPage,
   currentPage * ticketsPerPage
 );
+const statusPriority = [
+  "EMERGENCY",
+  "Under Pending",
+  "Pending Payment",
+  "Send Invoice",
+  "Waiting for Customer",
+  "Waiting for Parts",
+  "Waiting for Device",
+  "Sent to Mike",
+  "Repaired, informed",
+  "Warranty",
+  "Refund",
+  "Not Fixable / Closed",
+  "Return with update",
+  "Collected Device", // always pushed to the bottom
+];
 
+const handleSortActive = () => {
+  const sorted = [...data].sort((a, b) => {
+    const isCollectedA = a.status === "Collected Device";
+    const isCollectedB = b.status === "Collected Device";
+
+    // Collected Device always last
+    if (isCollectedA && !isCollectedB) return 1;
+    if (!isCollectedA && isCollectedB) return -1;
+      // Then sort by date (newest first)
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      if (dateB - dateA !== 0) return dateB - dateA;
+
+    const priorityA = statusPriority.indexOf(a.status);
+    const priorityB = statusPriority.indexOf(b.status);
+    return priorityA - priorityB;
+
+  });
+
+  setData(sorted); // Or however you're updating the ticket list
+};
+
+//TO RESET DATA
+const [originalData, setOriginalData] = useState([]);
+
+
+const handleReset = () => {
+  setData(originalData);
+};
 
 
   return (
@@ -507,9 +553,20 @@ const paginatedTickets = sortedTickets.slice(
           >
             Export Data
           </button>
+          <button
+            onClick={handleSortActive}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Active
+          </button>
+          <button onClick={handleReset} className="bg-gray-500 text-white px-4 py-1 rounded">
+            Reset
+          </button>
           {exportData ? <FilteredExport/>:null}
           
         </div>
+        
+
         <div class="relative hidden md:block">
             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
