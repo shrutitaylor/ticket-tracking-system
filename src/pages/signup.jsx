@@ -9,37 +9,33 @@ const Signup = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
+  const [authorID, setAuthorID] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate(); // Initialize navigation
-
-  // const handleSignup = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     await createUserWithEmailAndPassword(auth, email, password);
-  //     alert("Signup successful! Please log in.");
-  //     navigate("/login"); // Redirect to login page
-  //   } catch (err) {
-  //     setError(err.message);
-  //   }
-  // };
 
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-  
-      // Save user to Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        email: email,
-        firstName: firstName || "", // get name from a signup form input
-        lastName:lastName,
-        createdAt: new Date(),
-        lastLogin: new Date()
-      });
-  
-      alert("Signup successful! Please log in.");
-      navigate("/login"); // Redirect to login page
+      
+      if(authorID === import.meta.env.VITE_ADMIN_AUTHORISATION_ID) {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        // Save user to Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          email: email,
+          firstName: firstName || "", // get name from a signup form input
+          lastName:lastName,
+          createdAt: new Date(),
+          lastLogin: new Date()
+        });
+    
+        alert("Signup successful!");
+        navigate("/login"); // Redirect to login page
+
+      }else{
+        alert("You are not authorized to signup");
+        return;
+      }
     } catch (error) {
       console.error("Signup error:", error.message);
     }
@@ -60,6 +56,9 @@ const Signup = () => {
 
         <label htmlFor="password" className="mt-4 text-left">Password</label>
         <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-lg p-2 bg-gray-200" />
+
+        <label htmlFor="authorID" className="mt-4 text-left">Authorisation ID</label>
+        <input type="text" placeholder="Authorisation Id" value={authorID} onChange={(e) => setAuthorID(e.target.value)} required className="rounded-lg p-2 bg-gray-200" />
 
         <button type="submit" className="rounded-lg mt-10 font-aoMono uppercase pt-3 pb-2 bg-black text-white hover:scale-105 transition-all duration-300">
           Signup

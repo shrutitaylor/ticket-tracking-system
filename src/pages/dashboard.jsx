@@ -412,7 +412,7 @@ export default function Dashboard() {
       const ticketRef = doc(db, "tickets", selectedTicket.id);
       await updateDoc(ticketRef, {
         paid: method,
-        status: "Collected Device" , // Only close if paid by Cash or card
+        // status: "Collected Device" , // Only close if paid by Cash or card
       });
   
       setPayModalOpen(false);
@@ -697,9 +697,13 @@ const paginatedTickets = sortedTickets.slice(
                             : null
                         }
                         className={`px-3 py-1 rounded-lg transition-all ${
+<<<<<<< HEAD
                           row.paid === "Cash" || row.paid === "Online"
                             ? "bg-gray-400 cursor-not-allowed"
                             : "bg-blue-500 hover:bg-blue-600 text-white"
+=======
+                          row.paid =="Cash"? "bg-green-600 text-white cursor-not-allowed" : row.paid =="Online"  ? "bg-blue-500 text-white cursor-not-allowed" : "bg-black hover:scale-110 text-white"
+>>>>>>> fe6e0410a4583298bb250d84db27a24fbbfe02e0
                         }`}
                         disabled={row.paid === "Cash" || row.paid === "Online"}
                       >
@@ -745,7 +749,14 @@ const paginatedTickets = sortedTickets.slice(
             <div className="fixed inset-0 bg-black font-aoMono uppercase bg-opacity-50 flex items-center justify-center">
               <div className="bg-white rounded-lg p-6 w-full max-w-md text-center">
                 <h2 className="text-xl font-bold mb-4">Select Payment Method</h2>
-                <div className="flex justify-around">
+                <div className="flex flex-col gap-3 justify-around">
+                 Price $ {selectedTicket.price }
+                 {/* <button
+                    onClick={() => handlePayment("Advance")}
+                    className="bg-orange-500 hover:bg-orange-600 uppercase text-white px-4 pt-1.5 rounded-lg"
+                  >
+                    Pay Advance
+                  </button> */}
                   <button
                     onClick={() => handlePayment("Cash")}
                     className="bg-green-500 hover:bg-green-600 uppercase text-white px-4 pt-1.5 rounded-lg"
