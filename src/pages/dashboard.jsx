@@ -7,6 +7,7 @@ import { ArrowDownIcon, ArrowDownTrayIcon, ArrowPathIcon, ArrowPathRoundedSquare
 import FilteredExport from "./exportData";
 import { ArrowUturnLeftIcon } from "@heroicons/react/20/solid";
 import { Tooltip } from "@mui/material";
+import SendSMSButton from "../components/sendSMSButton";
 
 
 export default function Dashboard() {
@@ -415,7 +416,7 @@ export default function Dashboard() {
       const ticketRef = doc(db, "tickets", selectedTicket.id);
       await updateDoc(ticketRef, {
         paid: method,
-        status: "Collected Device" , // Only close if paid by Cash or card
+        // status: "Collected Device" , // Only close if paid by Cash or card
       });
   
       setPayModalOpen(false);
@@ -737,7 +738,7 @@ const handleReset = () => {
                   <tr
                     key={index}
                     className={` ${isCollected ? "bg-gray-200" : "hover:bg-gray-50"}`}
-                    onClick={() => handleOpen(row)}
+                    // onClick={() => handleOpen(row)}
                   >
                     {ticketFields.map((key) => (
                       <td
@@ -761,7 +762,7 @@ const handleReset = () => {
                         )}
                       </td>
                     ))}
-                    <td className="px-2 py-3 whitespace-nowrap text-sm font-spaceGrotesk">
+                    <td className="px-2 py-3 z-50 whitespace-nowrap text-sm flex flex-row font-spaceGrotesk">
                       <button
                         onClick={() => handleOpen(row)}
                         className="bg-[#9C795C] mr-2 hover:scale-105 text-white px-3 py-1 rounded-lg transition-colors"
@@ -783,7 +784,9 @@ const handleReset = () => {
                       >
                         Pay
                       </button>
+                      <SendSMSButton phone={row.contactNo} name={row.name}  />
                     </td>
+                    
                   </tr>
                 );
               })}
