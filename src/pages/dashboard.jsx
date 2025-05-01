@@ -652,44 +652,65 @@ const paginatedTickets = sortedTickets.slice(
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {currentTickets.map((row, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  {ticketFields.map((key) => (
-                    <td key={key} className="px-2 text-center items-center py-3 whitespace-nowrap text-md font-spaceGrotesk text-gray-900">
-                      {key === "priority" ? (
-                        <div className={`w-8 h-8 mx-auto self-align-center rounded-full flex items-center justify-center text-white font-bold ${getPriorityStyle(row[key])}`}>
-                          {row[key]}
-                        </div>
-                      ) : key === "status" ? (
-                        <span className={`text-sm font-medium px-2.5 py-0.5 rounded-full ${getStatusStyle(row[key])}`}>
-                          {row[key]}
-                        </span>
-                      ) : (
-                        row[key]
-                      )}
-                    </td>
-                  ))}
-                  <td className="px-2 py-3 whitespace-nowrap text-sm font-spaceGrotesk">
-                    <button
-                      onClick={() => handleOpen(row)}
-                      className="bg-[#9C795C] mr-2 hover:scale-105 text-white px-3 py-1 rounded-lg transition-colors"
-                    >
-                      View
-                    </button>
-                    <button
-                        onClick={() => row.paid !== "Cash" || row.paid !== "Online"? handleOpenPayModal(row):null}
+              {currentTickets.map((row, index) => {
+                const isCollected = row.status === "Collected Device";
+
+                return (
+                  <tr
+                    key={index}
+                    className={` ${isCollected ? "bg-gray-200" : "hover:bg-gray-50"}`}
+                    onClick={() => handleOpen(row)}
+                  >
+                    {ticketFields.map((key) => (
+                      <td
+                        key={key}
+                        className="px-2 text-center items-center py-3 whitespace-nowrap text-md font-spaceGrotesk text-gray-900"
+                      >
+                        {key === "priority" ? (
+                          <div
+                            className={`w-8 h-8 mx-auto self-align-center rounded-full flex items-center justify-center text-white font-bold ${getPriorityStyle(row[key])}`}
+                          >
+                            {row[key]}
+                          </div>
+                        ) : key === "status" ? (
+                          <span
+                            className={`text-sm font-medium px-2.5 py-0.5 rounded-full ${getStatusStyle(row[key])}`}
+                          >
+                            {row[key]}
+                          </span>
+                        ) : (
+                          row[key]
+                        )}
+                      </td>
+                    ))}
+                    <td className="px-2 py-3 whitespace-nowrap text-sm font-spaceGrotesk">
+                      <button
+                        onClick={() => handleOpen(row)}
+                        className="bg-[#9C795C] mr-2 hover:scale-105 text-white px-3 py-1 rounded-lg transition-colors"
+                      >
+                        View
+                      </button>
+                      <button
+                        onClick={() =>
+                          row.paid !== "Cash" && row.paid !== "Online"
+                            ? handleOpenPayModal(row)
+                            : null
+                        }
                         className={`px-3 py-1 rounded-lg transition-all ${
-                          row.paid =="Cash" || row.paid =="Online"  ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600 text-white"
+                          row.paid === "Cash" || row.paid === "Online"
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-blue-500 hover:bg-blue-600 text-white"
                         }`}
                         disabled={row.paid === "Cash" || row.paid === "Online"}
                       >
                         Pay
                       </button>
-                  </td>
-                 
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
+
           </table>
         </div>
 
