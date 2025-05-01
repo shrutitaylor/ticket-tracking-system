@@ -730,7 +730,7 @@ const handleReset = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-300">
               {currentTickets.map((row, index) => {
                 const isCollected = row.status === "Collected Device";
 
@@ -784,7 +784,7 @@ const handleReset = () => {
                       >
                         Pay
                       </button>
-                      <SendSMSButton phone={row.contactNo} name={row.name}  />
+                      <SendSMSButton phone={row.contactNo} name={row.name} device={row.device} />
                     </td>
                     
                   </tr>

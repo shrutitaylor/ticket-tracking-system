@@ -4,12 +4,12 @@ import React, { useState, useEffect } from 'react';
 
 // Move this outside the component
 const defaultMessages = {
-  received: "Hi {{name}},\nwe've received your device. We'll keep you updated as we diagnose the issue.",
-  inProgress: "Hi {{name}},\nyour device is currently being repaired. We'll notify you once it's ready for collection.",
-  ready: "Hi {{name}}, good news!\nYour device is ready for pickup at our store.",
-  delayed: "Hi {{name}},\nyour repair is taking longer than expected. We appreciate your patience and will update you soon.",
-  followUp: "Hi {{name}},\njust checking in. Let us know if you have any questions about your recent repair.",
-  collected: "Hi {{name}},\nthanks for collecting your device. We hope everything is working perfectly!"
+  received: "Hi Shruti!\n\nWe are reaching out to you with confirmation of receipt of your {{device}}.\nAny further updates will be sent to you via this channel hereafter.\n\nThanks,\nIO Labs Support",
+  inProgress: "Hi {{name}}!\n\nWe're reaching out to inform you that the repair of your {{device}} in progress. \nYou will receive a notification shortly once the device ready for collection.\n\nRegards,\nIO Labs Support",
+  // ready: "Hi {{name}}, good news!\nYour device is ready for pickup at our store.",
+  // delayed: "Hi {{name}},\nyour repair is taking longer than expected. We appreciate your patience and will update you soon.",
+  // followUp: "Hi {{name}},\njust checking in. Let us know if you have any questions about your recent repair.",
+  collected: "Hi {{name}}!\n\nThank you for choosing IO Labs for the repair of your {{device}}.\nWe wish you and your device a productive day!\n\nPlease leave us a feedback of our services on google reviews at your convenience.\n\nhttps://g.page/r/CSqH1h-wVtqyEBM/review\n\nCheers,\nIO Labs"
 };
 
 const formatPhoneNumber = (phone) => {
@@ -45,7 +45,7 @@ const SendSMSButton = ({ phone, name, device}) => {
   // Update message on category or name change
   useEffect(() => {
     if (defaultMessages[category]) {
-      setMessage(defaultMessages[category].replace("{{name}}", name));
+      setMessage(defaultMessages[category].replace("{{name}}", name).replace("{{device}}", device));
     }
   }, [category, name]);
 
@@ -92,15 +92,15 @@ const SendSMSButton = ({ phone, name, device}) => {
             >
               <option value="received">Received</option>
               <option value="inProgress">In Progress</option>
-              <option value="ready">Ready for Pickup</option>
+              {/* <option value="ready">Ready for Pickup</option>
               <option value="delayed">Delayed</option>
-              <option value="followUp">Follow Up</option>
+              <option value="followUp">Follow Up</option> */}
               <option value="collected">Collected</option>
             </select>
 
             <label className="block mt-3 text-sm font-medium">Message</label>
             <textarea
-              className="w-full mt-1 p-2 border rounded text-sm"
+              className="w-full mt-1 p-2 border min-h-[180px] rounded text-sm"
               rows={4}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
