@@ -20,10 +20,11 @@ const PrintTicketButton = ({ ticket, onBeforePrint }) => {
 
   useEffect(() => {
     setCurrentTicket(ticket);
+
   }, [ticket]);
 
   const handleGeneratePDF = async () => {
-    if (onBeforePrint) onBeforePrint();
+
 
     const element = printRef.current;
     const canvas = await html2canvas(element);
@@ -40,7 +41,7 @@ const PrintTicketButton = ({ ticket, onBeforePrint }) => {
     const blobUrl = URL.createObjectURL(pdfBlob);
     setPdfUrl(blobUrl);
 
-    pdf.save("ticket.pdf");
+    pdf.save("ticket"+currentTicket.name+".pdf");
   };
 
   return (

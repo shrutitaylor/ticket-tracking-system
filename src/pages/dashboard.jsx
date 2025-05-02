@@ -613,7 +613,7 @@ const handleReset = () => {
         <div className="fixed inset-0 font-spaceGrotesk z-50 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white mt-28 rounded-lg p-6 w-full max-w-2xl">
          
-              {!isVisible && (
+              {isVisible && (
                 <>
             <h2 className="text-2xl font-spaceGrotesk mb-4">
               {isUpdateMode ? "Update Ticket" : "Create Ticket"}
