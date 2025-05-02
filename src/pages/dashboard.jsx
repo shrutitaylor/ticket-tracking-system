@@ -8,11 +8,13 @@ import FilteredExport from "./exportData";
 import { ArrowUturnLeftIcon } from "@heroicons/react/20/solid";
 import { Tooltip } from "@mui/material";
 import SendSMSButton from "../components/sendSMSButton";
+import PrintTicketButton from "../components/printTicketButton";
 
 
 export default function Dashboard() {
   const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isUpdateMode, setIsUpdateMode] = useState(false);
   const [payModalOpen, setPayModalOpen] = useState(false);
@@ -63,6 +65,7 @@ export default function Dashboard() {
     "partsUsed",
     "called",
     "notes",
+    "paid",
     "priority",
     "status",
     "date"
@@ -606,9 +609,12 @@ const handleReset = () => {
       </div>
 
       {/* Modal */}
-      {open && (
+      {open && 
         <div className="fixed inset-0 font-spaceGrotesk z-50 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white mt-28 rounded-lg p-6 w-full max-w-2xl">
+         
+              {!isVisible && (
+                <>
             <h2 className="text-2xl font-spaceGrotesk mb-4">
               {isUpdateMode ? "Update Ticket" : "Create Ticket"}
             </h2>
@@ -664,6 +670,17 @@ const handleReset = () => {
                         ))}
                       </datalist>
                     </>
+                  ) : key === "notes" ? (
+                    <textarea
+                      type="text"
+                      name={getDisplayName(key)}
+                      value={value}
+                      onChange={handleChange}
+                      disabled={key === "date" || key === "ticketNo"}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk ${
+                        (key === "date" || key === "ticketNo") ? "bg-gray-100" : ""
+                      }`}
+                    />
                   ) : (
                     <input
                       type="text"
@@ -677,11 +694,16 @@ const handleReset = () => {
                     />
                   )}
                 </div>
+                
               );
+              
             })}
 
             </div>
+           
             <div className="flex justify-end gap-4 mt-6">
+              <div >
+              <PrintTicketButton ticket={newTicket} onBeforePrint={() => setIsVisible(false)}  /></div>
               <button
                 onClick={handleClose}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 font-spaceGrotesk"
@@ -695,9 +717,12 @@ const handleReset = () => {
                 {isUpdateMode ? "Update" : "Submit"}
               </button>
             </div>
+          
+            </> )}
           </div>
+          
         </div>
-      )}
+}
 
       {/* Table */}
       {filteredData.length === 0 ? (
