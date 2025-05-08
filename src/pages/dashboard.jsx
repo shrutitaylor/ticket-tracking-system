@@ -767,12 +767,12 @@ const handleReset = () => {
             </thead>
             <tbody className="divide-y divide-gray-300">
               {currentTickets.map((row, index) => {
-                const isCollected = row.status === "Collected Device";
+                const isClosed = row.priority === "O";
 
                 return (
                   <tr
                     key={index}
-                    className={` ${isCollected ? "bg-gray-200" : "hover:bg-gray-50"}`}
+                    className={` ${isClosed ? "bg-gray-200" : "hover:bg-gray-50"}`}
                     // onClick={() => handleOpen(row)}
                   >
                     {ticketFields.map((key) => (
