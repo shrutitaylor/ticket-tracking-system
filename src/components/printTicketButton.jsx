@@ -92,7 +92,7 @@ const PrintTicketButton = ({ ticket, onBeforePrint }) => {
               <div className="text-xs my-2">
                 <strong>Device:</strong> {currentTicket.device}<br />
                 <strong>Issue:</strong> {currentTicket.issues}<br />
-                <strong>Cost:</strong> {currentTicket.price}<br />
+                <strong>Cost:</strong> $ {currentTicket.price}<br />
               </div>
 
               <hr className="my-2" />

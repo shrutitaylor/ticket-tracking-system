@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { db } from "./firebaseConfig";
+import { getAuth } from "firebase/auth";
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc, query, orderBy, limit } from "firebase/firestore";
 import { useLoader } from "../contexts/LoaderContext";
 import { ArrowDownIcon, ArrowDownTrayIcon, ArrowPathIcon, ArrowPathRoundedSquareIcon, ArrowUpIcon, BarsArrowDownIcon, BarsArrowUpIcon, FunnelIcon } from "@heroicons/react/16/solid";
@@ -9,6 +10,7 @@ import { ArrowUturnLeftIcon } from "@heroicons/react/20/solid";
 import { Tooltip } from "@mui/material";
 import SendSMSButton from "../components/sendSMSButton";
 import PrintTicketButton from "../components/printTicketButton";
+import DeleteTicketButton from "../components/deleteTicketButton";
 
 
 export default function Dashboard() {
@@ -22,7 +24,8 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const ticketsPerPage = 20;
   const [exportData, setExportData] = useState(false)
-  
+  const auth = getAuth();
+  const user = auth.currentUser;
 
 
 
@@ -325,6 +328,7 @@ export default function Dashboard() {
   };
   
   useEffect(() => {
+    
     fetchData();
   }, []);
   
@@ -343,6 +347,8 @@ export default function Dashboard() {
       }
     }
   };
+
+  
 
   const handleOpen = async (ticket = null) => {
     if (ticket) {
@@ -810,6 +816,13 @@ const handleReset = () => {
                         Pay
                       </button>
                       <SendSMSButton phone={row.contactNo} name={row.name} device={row.device} />
+                      { user.email == "iolabs.au.ops@gmail.com" &&
+                      <DeleteTicketButton
+                        ticketId={row.id}
+                        onDeleted={(deletedId) => {
+                          setData(prev => prev.filter(ticket => ticket.id !== deletedId));
+                        }}
+                      />}
                     </td>
                     
                   </tr>
