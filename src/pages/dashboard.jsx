@@ -250,7 +250,8 @@ export default function Dashboard() {
     const styles = {
       H: "bg-red-500",
       M: "bg-yellow-500",
-      L: "bg-green-500"
+      L: "bg-green-500",
+      O: "bg-gray-500"
     };
     return styles[priority] || "bg-gray-500";
   };
@@ -372,8 +373,8 @@ export default function Dashboard() {
         partsUsed: "",
         called: "",
         notes: "",
-        priority: "",
-        status: "open",
+        priority: "L",
+        status: "Return with update",
         date: date,
       });
       setIsUpdateMode(false);
@@ -632,7 +633,7 @@ const handleReset = () => {
                   <label className="block text-sm font-spaceGrotesk mb-1">{getDisplayName(key)}</label>
                   {key === "priority" ? (
                     <div className="flex gap-4">
-                      {["H", "M", "L"].map((p) => (
+                      {["H", "M", "L", "O"].map((p) => (
                         <label key={p} className="flex items-center cursor-pointer">
                           <input
                             type="radio"
@@ -778,9 +779,9 @@ const handleReset = () => {
                       >
                         {key === "priority" ? (
                           <div
-                            className={`w-8 h-8 mx-auto self-align-center rounded-full flex items-center justify-center text-white font-bold ${row["status"] !=="Collected Device" ? getPriorityStyle(row[key]) : "bg-gray-500"} `}
+                            className={`w-8 h-8 mx-auto self-align-center rounded-full flex items-center justify-center text-white font-bold ${getPriorityStyle(row[key])} `}
                           >
-                            {row["status"] !=="Collected Device" ? row[key] : "O"}
+                            {row[key]}
                           </div>
                         ) : key === "status" ? (
                           <span
