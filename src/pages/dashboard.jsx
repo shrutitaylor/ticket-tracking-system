@@ -372,6 +372,7 @@ export default function Dashboard() {
         service: "",
         partsUsed: "",
         called: "",
+        paid:"",
         notes: "",
         priority: "L",
         status: "Return with update",
@@ -415,11 +416,13 @@ export default function Dashboard() {
   };
   
   const handleOpenPayModal = (ticket) => {
+    console.log("yes")
     setSelectedTicket(ticket);
     setPayModalOpen(true);
   };
   
   const handlePayment = async (method) => {
+    console.log(method);
     if (!selectedTicket) return;
   
     try {
@@ -803,19 +806,22 @@ const handleReset = () => {
                       </button>
                       <button
                         onClick={() =>
-                          row.paid !== "Cash" && row.paid !== "Online"
-                            ? handleOpenPayModal(row)
-                            : null
+                          row.paid && (row.paid.startsWith("Cash") || row.paid.startsWith("Online"))
+                            ? null : handleOpenPayModal(row)
+                            
                         }
                         className={`px-3 py-1 rounded-lg transition-all ${
-                          row.paid === "Cash" || row.paid === "Online"
+                          row.paid && (row.paid.startsWith("Cash") || row.paid.startsWith("Online"))
                             ? "bg-gray-400 cursor-not-allowed"
                             : "bg-blue-500 hover:bg-blue-600 text-white"
                         }`}
-                        disabled={row.paid === "Cash" || row.paid === "Online"}
+                        disabled={
+                          row.paid && (row.paid.startsWith("Cash") || row.paid.startsWith("Online"))
+                        }
                       >
                         Pay
                       </button>
+
                       <SendSMSButton phone={row.contactNo} name={row.name} device={row.device} />
                       { user.email == "iolabs.au.ops@gmail.com" &&
                       <DeleteTicketButton
@@ -867,13 +873,13 @@ const handleReset = () => {
                 <h2 className="text-xl font-bold mb-4">Select Payment Method</h2>
                 <div className="flex justify-around">
                   <button
-                    onClick={() => handlePayment("Cash")}
+                    onClick={() => handlePayment("Cash - "+ new Date().toLocaleDateString("en-GB"))}
                     className="bg-green-500 hover:bg-green-600 uppercase text-white px-4 pt-1.5 rounded-lg"
                   >
                     Pay by Cash
                   </button>
                   <button
-                    onClick={() => handlePayment("Online")}
+                    onClick={() => handlePayment("Online - "+ new Date().toLocaleDateString("en-GB"))}
                     className="bg-blue-500 hover:bg-blue-600 uppercase text-white px-4 pt-1.5 rounded-lg"
                   >
                     Pay by Card
