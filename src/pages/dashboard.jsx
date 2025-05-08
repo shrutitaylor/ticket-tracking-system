@@ -693,7 +693,7 @@ const handleReset = () => {
                       name={getDisplayName(key)}
                       value={value}
                       onChange={handleChange}
-                      // disabled={key === "date" || key === "ticketNo"}
+                      disabled={ user.email !== "iolabs.au.ops@gmail.com" &&   key === "date" || key === "ticketNo"}
                       className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk ${
                         (key === "date" || key === "ticketNo") ? "bg-gray-100" : ""
                       }`}
@@ -778,9 +778,9 @@ const handleReset = () => {
                       >
                         {key === "priority" ? (
                           <div
-                            className={`w-8 h-8 mx-auto self-align-center rounded-full flex items-center justify-center text-white font-bold ${getPriorityStyle(row[key])}`}
+                            className={`w-8 h-8 mx-auto self-align-center rounded-full flex items-center justify-center text-white font-bold ${row["status"] !=="Collected Device" ? getPriorityStyle(row[key]) : "bg-gray-500"} `}
                           >
-                            {row[key]}
+                            {row["status"] !=="Collected Device" ? row[key] : "O"}
                           </div>
                         ) : key === "status" ? (
                           <span
