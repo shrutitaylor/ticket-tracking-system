@@ -11,10 +11,12 @@ import { Tooltip } from "@mui/material";
 import SendSMSButton from "../components/sendSMSButton";
 import PrintTicketButton from "../components/printTicketButton";
 import DeleteTicketButton from "../components/deleteTicketButton";
+import ReportsChart from "../components/reportcHARTS.JSX";
 
 
 export default function Report() {
   const [data, setData] = useState([]);
+  const [reportData, setReportData] = useState([]);
   const [open, setOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -173,6 +175,7 @@ export default function Report() {
   
       setData(tickets);
       setOriginalData(tickets);
+      setReportData(tickets);
     } catch (error) {
       console.error("Error loading tickets:", error);
     }
@@ -339,7 +342,9 @@ const filterThisWeek = () => {
           REPORT
         </h1>
       </div>
-
+      <div className="flex w-full mb-6">
+        <ReportsChart data={reportData} />
+      </div>
       <div className="flex justify-between items-center mb-6">
         <div className="flex gap-4 font-spaceGrotesk ">
           
