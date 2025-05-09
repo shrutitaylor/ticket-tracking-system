@@ -250,7 +250,7 @@ export default function Dashboard() {
     const styles = {
       H: "bg-red-500",
       M: "bg-yellow-500",
-      L: "bg-green-500",
+      L: "bg-lime-500",
       O: "bg-gray-500"
     };
     return styles[priority] || "bg-gray-500";
@@ -258,7 +258,7 @@ export default function Dashboard() {
 
   // Function to get status badge style
   const styles = {
-    "Collected Device": "bg-green-800 text-green-100 ",
+    "Collected Device": "bg-lime-800 text-lime-100 ",
     "Not Fixable / Closed": "bg-blue-100 text-blue-800 ",
     "Waiting for Device": "bg-violet-100 text-violet-800 ",
     "Waiting for Parts": "bg-violet-100 text-violet-800 ",

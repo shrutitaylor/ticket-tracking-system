@@ -83,6 +83,7 @@ const Navbar = () => {
                         </a>
                       </li> */}
                       {user.email === "iolabs.au.ops@gmail.com" && (
+                        <>
                         <li>
                           <a
                             href="/users"
@@ -92,6 +93,16 @@ const Navbar = () => {
                             Users
                           </a>
                         </li>
+                        <li>
+                        <a
+                          href="/report"
+                          className="block px-4 py-2 uppercase text-sm text-gray-700 hover:bg-gray-200 "
+                          onClick={toggleDropdown} 
+                        >
+                          Report
+                        </a>
+                      </li>
+                      </>
                       )}
                       <li>
                         <button
