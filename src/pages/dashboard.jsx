@@ -27,6 +27,36 @@ export default function Dashboard() {
   const auth = getAuth();
   const user = auth.currentUser;
 
+  //Checkboxes handle
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [bulkPriority, setBulkPriority] = useState("");
+  const [bulkStatus, setBulkStatus] = useState("");
+  const handleBulkChange = (field, value) => {
+    if (!value) return;
+    const updatedData = data.map((ticket) => {
+      if (selectedRows.includes(ticket.id)) {
+        return { ...ticket, [field]: value };
+      }
+      return ticket;
+    });
+  
+    // Update your state (and backend if needed)
+    setData(updatedData);
+  
+    // Optionally update Firebase here
+    selectedRows.forEach(async (id) => {
+      const ticketRef = doc(db, "tickets", id); // adjust path as needed
+      await updateDoc(ticketRef, {
+        [field]: value,
+      });
+    });
+  
+    setSelectedRows([]); // clear selection
+    setSelectAll(false);
+  };
+  
+
 
 
   const [newTicket, setNewTicket] = useState({
@@ -544,7 +574,7 @@ const handleReset = () => {
         <div className="flex gap-4">
           <button
             onClick={() => handleOpen()}
-            className="bg-[#9C795C] hover:scale-110 transition-all duration-300 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
+            className=" bg-amber-800/80 hover:bg-amber-800/40 hover:text-amber-800/80  transition-all duration-300 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
           >
             Create Ticket
           </button>
@@ -554,7 +584,7 @@ const handleReset = () => {
           >
             Delete All Tickets
           </button> */}
-          <label className="bg-green-600 hover:scale-105 text-white px-4 py-2 rounded-lg font-spaceGrotesk cursor-pointer">
+          <label className="bg-lime-300 hover:bg-lime-500 hover:text-lime-100 text-lime-900 px-4 py-2 rounded-lg font-spaceGrotesk cursor-pointer">
             Import CSV
             <input
               type="file"
@@ -566,7 +596,7 @@ const handleReset = () => {
           <div className="relative group">
           <button
             onClick={() => setExportData(!exportData)}
-            className="bg-blue-500 hover:bg-blue-600 text-white p-2.5 rounded-lg font-spaceGrotesk transition-colors"
+            className="bg-sky-200 hover:bg-sky-400 hover:text-sky-100 text-sky-900 p-2.5 rounded-lg font-spaceGrotesk transition-colors"
           >
             <ArrowDownTrayIcon height={20} width={20} />
             <span className="absolute z-100 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
@@ -577,7 +607,7 @@ const handleReset = () => {
           <div className="relative group">
           <button
             onClick={handleSortActive}
-            className="p-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-spaceGrotesk"
+            className="p-2.5 bg-purple-200 hover:bg-purple-400 hover:text-purple-100 text-purple-600 rounded-lg font-spaceGrotesk"
           >
             <FunnelIcon height={19} width={19} />
             <span className="absolute z-100 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
@@ -588,7 +618,7 @@ const handleReset = () => {
           <div className="relative group">
           <button
             onClick={handleReset}
-            className="bg-gray-500 p-2.5 text-white rounded-lg font-spaceGrotesk"
+            className="bg-amber-200 p-2.5 text-amber-800 hover:bg-amber-400 hover:text-amber-100 rounded-lg font-spaceGrotesk"
             title="Reset to default"
           >
             <ArrowPathRoundedSquareIcon height={20} width={20} />
@@ -736,14 +766,84 @@ const handleReset = () => {
 
       {/* Table */}
       {filteredData.length === 0 ? (
+        
         <div className="bg-red-100 border border-red-400 text-red-700 px-2 py-3 rounded relative" role="alert">
           <span className="block sm:inline">No matching tickets found.</span>
         </div>
+
       ) : (
-        <div className="overflow-x-auto bg-white rounded-md shadow-lg mt-5">
+        
+        <>
+               {selectedRows.length > 0 && (
+                  <div className="flex font-spaceGrotesk items-center space-x-4 mb-4">
+                    {/* Bulk Priority */}
+                    <label htmlFor="bulk-priority">Change Priority:</label>
+                      <select
+                        id="bulk-priority"
+                        value={bulkPriority}
+                        onChange={(e) => setBulkPriority(e.target.value)}
+                        className="border px-2 py-1 rounded"
+                      >
+                        <option value="">Select Priority</option>
+                        <option value="L">Low</option>
+                        <option value="M">Medium</option>
+                        <option value="H">High</option>
+                        <option value="O">Close</option>
+                      </select>
+
+                    {/* Bulk Status */}
+                    <label htmlFor="bulk-status">Change Status:</label>
+                      <select
+                        id="bulk-status"
+                        value={bulkStatus}
+                        onChange={(e) => setBulkStatus(e.target.value)}
+                        className="border px-2 py-1 rounded"
+                      >
+                        <option value="">Select Status</option>
+                        {Object.entries(styles).map(([statusKey]) => (
+                          <option key={statusKey} value={statusKey}>
+                            {statusKey}
+                          </option>
+                        ))}
+                      </select>
+
+                    {/* Change Button */}
+                    <button
+                      className="bg-lime-200 text-lime-900 px-3 py-1 rounded-lg hover:bg-lime-500 transition-all"
+                      onClick={() => {
+                        if (bulkPriority) handleBulkChange("priority", bulkPriority);
+                        if (bulkStatus) handleBulkChange("status", bulkStatus);
+                        setBulkPriority("");
+                        setBulkStatus("");
+                      }}
+                    >
+                      Change
+                    </button>
+                  </div>
+                )}
+      <div className="overflow-x-auto bg-white rounded-md shadow-lg mt-5">
           <table className="min-w-full">
             <thead>
-              <tr className="bg-gray-300">
+              
+              
+                <tr className="bg-gray-300">
+                <th className="px-2 py-3 text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectAll}
+                    onChange={(e) => {
+                      const isChecked = e.target.checked;
+                      setSelectAll(isChecked);
+                      if (isChecked) {
+                        const allIds = currentTickets.map((row) => row.id);
+                        setSelectedRows(allIds);
+                      } else {
+                        setSelectedRows([]);
+                      }
+                    }}
+                  />
+                </th>
+
               {ticketFields.map((key) => (
                 <>
                 <th key={key} 
@@ -768,6 +868,7 @@ const handleReset = () => {
             <tbody className="divide-y divide-gray-300">
               {currentTickets.map((row, index) => {
                 const isClosed = row.priority === "O";
+                const isSelected = selectedRows.includes(row.id);
 
                 return (
                   <tr
@@ -775,6 +876,19 @@ const handleReset = () => {
                     className={` ${isClosed ? "bg-gray-200" : "hover:bg-gray-50"}`}
                     // onClick={() => handleOpen(row)}
                   >
+                    <td className="px-2 text-center py-3">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {
+                          setSelectedRows((prev) =>
+                            prev.includes(row.id)
+                              ? prev.filter((id) => id !== row.id)
+                              : [...prev, row.id]
+                          );
+                        }}
+                      />
+                    </td>
                     {ticketFields.map((key) => (
                       <td
                         key={key}
@@ -800,7 +914,7 @@ const handleReset = () => {
                     <td className="px-2 py-3 z-50 whitespace-nowrap text-sm flex flex-row font-spaceGrotesk">
                       <button
                         onClick={() => handleOpen(row)}
-                        className="bg-[#9C795C] mr-2 hover:scale-105 text-white px-3 py-1 rounded-lg transition-colors"
+                        className="bg-amber-800/80 hover:bg-amber-800/40 hover:text-amber-800/80  transition-all duration-300 text-white mr-2 px-3 py-1 rounded-lg transition-colors"
                       >
                         View
                       </button>
@@ -839,7 +953,7 @@ const handleReset = () => {
 
           </table>
         </div>
-
+        </>
       )}
       <div className="flex justify-center items-center mt-4 gap-4">
         <button
