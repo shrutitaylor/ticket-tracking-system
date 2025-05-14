@@ -503,8 +503,8 @@ const statusPriority = [
 
 const handleSortActive = () => {
   const sorted = [...data].sort((a, b) => {
-    const isCollectedA = a.status === "Collected Device";
-    const isCollectedB = b.status === "Collected Device";
+    const isCollectedA = a.priority === "O";
+    const isCollectedB = b.priority === "O";
 
     // Collected Device always last
     if (isCollectedA && !isCollectedB) return 1;
