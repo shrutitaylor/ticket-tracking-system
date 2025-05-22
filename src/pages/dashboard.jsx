@@ -179,31 +179,60 @@ export default function Dashboard() {
     "Samsung Galaxy Z Flip 4"
   ];
   
-  const mapCSVRowToTicket = (row) => {
-    const rawDate = row["date"];
-    const formattedDate =
-      typeof rawDate === "string"
-        ? rawDate
-        : XLSX.SSF.format("dd/mm/yyyy", rawDate); // handle Excel date numbers
   
-    return {
-      ticketNo: row["TicketNo"] || "",
-      customerId: row["CustomerId"] || "",
-      priority: row["priority"] || "",
-      status: row["status"] || "open",
-      name: row["name"] || "",
-      contactNo: row["contactNo"] || "",
-      device: row["device"] || "",
-      issues: row["issues"] || "",
-      price: row["price"] || "",
-      service: row["service"] || "",
-      partsUsed: row["partsUsed"] || "",
-      called: row["called"] || "",
-      notes: row["notes"] || "",
-      paid: row['status'] == "Collected Device" ? "Card" :  "No",
-      date: rawDate || new Date().toLocaleDateString("en-GB"),
-    };
+
+  const mapCSVRowToTicket = (row) => {
+  const rawDate = row["date"] || row["Date"];
+  let parsedDate = "";
+
+  if (!rawDate) {
+    parsedDate = new Date().toLocaleDateString("en-GB");
+  } else if (typeof rawDate === "number") {
+    const date = XLSX.SSF.parse_date_code(rawDate);
+    parsedDate = `${String(date.m).padStart(2, "0")}/${String(date.d).padStart(2, "0")}/${date.y}`;
+  } else if (typeof rawDate === "string") {
+    const parts = rawDate.trim().split(/[\/\-]/);
+    if (parts.length === 3) {
+      let [a, b, c] = parts;
+      // Assume dd/mm/yyyy if a > 12
+      if (Number(a) > 12) {
+        parsedDate = `${a.padStart(2, "0")}/${b.padStart(2, "0")}/${c}`;
+      } else if (Number(b) > 12) {
+        parsedDate = `${b.padStart(2, "0")}/${a.padStart(2, "0")}/${c}`;
+      } else {
+        // Ambiguous, assume dd/mm/yyyy
+        parsedDate = `${a.padStart(2, "0")}/${b.padStart(2, "0")}/${c}`;
+      }
+    } else {
+      parsedDate = rawDate;
+    }
+  } else {
+    parsedDate = String(rawDate);
+  }
+  console.log("Raw Date:", rawDate, "-> Parsed Date:", parsedDate);
+
+
+  return {
+    ticketNo: row["TicketNo"] || "",
+    customerId: row["CustomerId"] || "",
+    priority: row["priority"] || "",
+    status: row["status"] || "open",
+    name: row["name"] || "",
+    contactNo: row["contactNo"] || "",
+    device: row["device"] || "",
+    issues: row["issues"] || "",
+    price: row["price"] || "",
+    service: row["service"] || "",
+    partsUsed: row["partsUsed"] || "",
+    called: row["called"] || "",
+    notes: row["notes"] || "",
+    paid: row["paid"] || (row["status"] === "Collected Device" ? "Card" : "No"),
+    date: parsedDate,
   };
+};
+
+
+
 
   const handleCSVUpload = async (e) => {
     const file = e.target.files[0];
