@@ -465,7 +465,10 @@ export default function Dashboard() {
       }
 
       const today = new Date();
-      const dateStr = today.toLocaleDateString("en-GB").replace(/\//g, "");
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+      const year = String(today.getFullYear()).slice(-2); // Get last two digits of year
+      const dateStr = `${day}${month}${year}`;
       const ticketNo = `${customerID}${dateStr}`;
       // console.log("Generated ticket number:", ticketNo);
 
