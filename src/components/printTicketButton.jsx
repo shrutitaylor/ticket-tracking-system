@@ -15,7 +15,8 @@ const PrintTicketButton = ({ ticket, onBeforePrint }) => {
     contactNo: "0400000000",
     device: "iPhone 13",
     issue: "Screen cracked",
-    price: "$200"
+    price: "$200",
+    ticketNo:"111134",
   });
 
   useEffect(() => {
@@ -82,6 +83,8 @@ const PrintTicketButton = ({ ticket, onBeforePrint }) => {
               <hr className="my-2" />
 
               <div className="text-xs my-2">
+                 <strong>Invoice Num:</strong>INV-{currentTicket.ticketNo}<br />
+                 <hr className="my-2" />
                 <strong>Date:</strong> {currentTicket.date}<br />
                 <strong>Name:</strong> {currentTicket.name}<br />
                 <strong>Contact:</strong> {currentTicket.contactNo}<br />

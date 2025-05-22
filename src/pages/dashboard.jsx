@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { db } from "./firebaseConfig";
 import { getAuth } from "firebase/auth";
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc, query, orderBy, limit } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc,where, getDoc, query, orderBy, limit } from "firebase/firestore";
 import { useLoader } from "../contexts/LoaderContext";
 import { ArrowDownIcon, ArrowDownTrayIcon, ArrowPathIcon, ArrowPathRoundedSquareIcon, ArrowUpIcon, BarsArrowDownIcon, BarsArrowUpIcon, FunnelIcon } from "@heroicons/react/16/solid";
 import FilteredExport from "./exportData";
@@ -77,7 +77,7 @@ export default function Dashboard() {
   });
 
   const ticketFields = [
-    
+    // "ticketNo",
     "priority",
     "status",
     "name",
@@ -89,6 +89,7 @@ export default function Dashboard() {
 
   ];
   const updateTicketFields = [
+    "ticketNo",
     "name",
     "contactNo",
     "device",
@@ -186,7 +187,8 @@ export default function Dashboard() {
         : XLSX.SSF.format("dd/mm/yyyy", rawDate); // handle Excel date numbers
   
     return {
-      ticketNo: row["ticketNo"] || "",
+      ticketNo: row["TicketNo"] || "",
+      customerId: row["CustomerId"] || "",
       priority: row["priority"] || "",
       status: row["status"] || "open",
       name: row["name"] || "",
@@ -199,7 +201,7 @@ export default function Dashboard() {
       called: row["called"] || "",
       notes: row["notes"] || "",
       paid: row['status'] == "Collected Device" ? "Card" :  "No",
-      date: formattedDate || new Date().toLocaleDateString("en-GB"),
+      date: rawDate || new Date().toLocaleDateString("en-GB"),
     };
   };
 
@@ -236,7 +238,7 @@ export default function Dashboard() {
   // Function to convert display name to field name
   const getFieldName = (displayName) => {
     const fieldMap = {
-      "Ticket No.": "ticketNo",
+      "Ticket No.": "TicketNo",
       "Priority": "priority",
       "Status": "status",
       "Name": "name",
@@ -308,10 +310,10 @@ export default function Dashboard() {
   };
 
   // Function to get the next ticket number
-  const getNextTicketNumber = async () => {
+  const getCustomerId = async () => {
     try {
       const ticketsRef = collection(db, "tickets");
-      const q = query(ticketsRef, orderBy("ticketNo", "desc"), limit(1));
+      const q = query(ticketsRef, orderBy("customerId", "desc"), limit(1));
       const querySnapshot = await getDocs(q);
       
       if (querySnapshot.empty) {
@@ -319,7 +321,9 @@ export default function Dashboard() {
       }
       
       const lastTicket = querySnapshot.docs[0].data();
-      const lastNumber = parseInt(lastTicket.ticketNo);
+      const lastNumber = parseInt(lastTicket.customerId);
+      // console.log("Last customer id:", lastNumber);
+
       return (lastNumber + 1).toString();
     } catch (error) {
       console.error("Error getting next ticket number:", error);
@@ -352,6 +356,7 @@ export default function Dashboard() {
       });
       
       setData(tickets);
+      // console.log("Fetched tickets:", tickets);
       setOriginalData(tickets)
     } catch (error) {
       console.error("Error loading tickets:", error);
@@ -390,10 +395,11 @@ export default function Dashboard() {
       // Create mode
       const today = new Date();
       const date = today.toLocaleDateString('en-GB');
-      const nextTicketNo = await getNextTicketNumber();
+      const nextTicketNo = await getCustomerId();
       
       setNewTicket({
         ticketNo: nextTicketNo,
+        customerId:"",
         name: "",
         contactNo: "",
         device: "",
@@ -413,6 +419,17 @@ export default function Dashboard() {
     setOpen(true);
   };
 
+  const getCustomerByPhone = async (phone) => {
+  const q = query(collection(db, "tickets"), where("contactNo", "==", phone));
+  const querySnapshot = await getDocs(q);
+  if (!querySnapshot.empty) {
+    const doc = querySnapshot.docs[0];
+    // console.log("Customer found:", doc.data());
+    return { id: doc.id, data: doc.data() };
+  }
+  return null;
+};
+
   const handleClose = () => {
     setOpen(false);
     setIsUpdateMode(false);
@@ -424,27 +441,57 @@ export default function Dashboard() {
   };
 
   const handleSubmit = async () => {
-    try {
-      if (isUpdateMode) {
-        // Update existing ticket
-        const ticketRef = doc(db, "tickets", newTicket.id);
-        await updateDoc(ticketRef, newTicket);
-      } else {
-        // Create new ticket
-        const docRef = await addDoc(collection(db, "tickets"), newTicket);
+  try {
+    if (isUpdateMode) {
+      // Update existing ticket
+      const ticketRef = doc(db, "tickets", newTicket.id);
+      await updateDoc(ticketRef, newTicket);
+    } else {
+      // --- Generate Ticket Number before saving ---
+      const phone = newTicket.contactNo;
+      if (!phone) {
+        alert("Contact number is required.");
+        return;
       }
-  
-      // Close modal
-      setOpen(false);
-      setIsUpdateMode(false);
-  
-      // Fetch updated data from Firestore
-      await fetchData();
-    } catch (error) {
-      console.error("Error saving ticket:", error);
+
+      const existingCustomer = await getCustomerByPhone(phone);
+      let customerID;
+
+      if (existingCustomer) {
+        customerID = existingCustomer.data.customerId;
+      } else {
+        const newID = await getCustomerId();
+        customerID = newID;
+      }
+
+      const today = new Date();
+      const dateStr = today.toLocaleDateString("en-GB").replace(/\//g, "");
+      const ticketNo = `${customerID}${dateStr}`;
+      // console.log("Generated ticket number:", ticketNo);
+
+      // Final ticket object with ticketNo and date
+      const finalTicket = {
+        ...newTicket,
+        ticketNo,
+        date: today.toLocaleDateString("en-GB"),
+        customerId: customerID,
+      };
+
+      // Save to tickets collection
+      await addDoc(collection(db, "tickets"), finalTicket);
     }
-  };
-  
+
+    // Close modal
+    setOpen(false);
+    setIsUpdateMode(false);
+
+    // Refresh data
+    await fetchData();
+  } catch (error) {
+    console.error("Error saving ticket:", error);
+  }
+};
+
   const handleOpenPayModal = (ticket) => {
     console.log("yes")
     setSelectedTicket(ticket);
@@ -452,7 +499,7 @@ export default function Dashboard() {
   };
   
   const handlePayment = async (method) => {
-    console.log(method);
+    // console.log(method);
     if (!selectedTicket) return;
   
     try {
@@ -578,12 +625,12 @@ const handleReset = () => {
           >
             Create Ticket
           </button>
-          {/* <button
+          <button
             onClick={handleDeleteAll}
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
           >
             Delete All Tickets
-          </button> */}
+          </button>
           <label className="bg-lime-300 hover:bg-lime-500 hover:text-lime-100 text-lime-900 px-4 py-2 rounded-lg font-spaceGrotesk cursor-pointer">
             Import CSV
             <input
