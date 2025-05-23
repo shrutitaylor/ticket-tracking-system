@@ -466,7 +466,11 @@ export default function Dashboard() {
 
   const handleChange = (e) => {
     const fieldName = getFieldName(e.target.name);
-    setNewTicket({ ...newTicket, [fieldName]: e.target.value });
+    let value = e.target.value;
+      if (fieldName === "contactNo") {
+      value = formatPhoneNumber(value);
+      }
+    setNewTicket({ ...newTicket, [fieldName]: value });
   };
 
   const handleSubmit = async () => {
@@ -549,15 +553,18 @@ export default function Dashboard() {
     }
   };
     
-  // 1. Apply search to the full data
 const filteredData = data.filter(ticket => {
-  const query = searchQuery.toLowerCase();
-  return Object.values(ticket).some(
-    value =>
-      typeof value === "string" &&
-      value.toLowerCase().includes(query)
-  );
+  const query = searchQuery.toLowerCase().replace(/\s+/g, ""); // remove all spaces
+
+  return Object.values(ticket).some(value => {
+    if (typeof value === "string" || typeof value === "number") {
+      const normalizedValue = String(value).toLowerCase().replace(/\s+/g, "");
+      return normalizedValue.includes(query);
+    }
+    return false;
+  });
 });
+
 
 // 2. Paginate the filtered data
 const indexOfLastTicket = currentPage * ticketsPerPage;
@@ -575,24 +582,51 @@ const handleSort = (key) => {
   setSortConfig({ key, direction });
 };
 
-const sortedTickets = data.sort((a, b) => {
+const sortedTickets = [...filteredData].sort((a, b) => {
   if (!sortConfig.key) return 0;
+
   const aVal = a[sortConfig.key];
   const bVal = b[sortConfig.key];
 
+  // Special handling for dates
+  if (sortConfig.key === "date") {
+    const parseDate = (d) => {
+      if (typeof d === "string") {
+        const [day, month, year] = d.split("/").map(Number);
+        return new Date(year, month - 1, day);
+      }
+      return new Date(d);
+    };
+
+    const dateA = parseDate(aVal);
+    const dateB = parseDate(bVal);
+
+    return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
+  }
+
+  // Numbers
   if (typeof aVal === 'number' && typeof bVal === 'number') {
     return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
   }
 
+  // Strings
   return sortConfig.direction === 'asc'
     ? String(aVal).localeCompare(String(bVal))
     : String(bVal).localeCompare(String(aVal));
 });
 
+
+
 const paginatedTickets = sortedTickets.slice(
   (currentPage - 1) * ticketsPerPage,
   currentPage * ticketsPerPage
 );
+
+//set first page of pagination when search or sort are in use
+useEffect(() => {
+  setCurrentPage(1);
+}, [searchQuery,sortConfig]);
+
 const statusPriority = [
   "EMERGENCY",
   "Under Pending",
@@ -640,6 +674,22 @@ const handleReset = () => {
   setData(originalData);
 };
 
+// Format the incoming phone numbers
+const formatPhoneNumber = (phone) => {
+  // Remove all non-digit characters
+  const digits = phone.toString().replace(/\D/g, "");
+
+  // If the number is less than 9 digits, return as-is
+  if (digits.length < 9) return phone;
+
+  // Pad the number with a leading 0 if it starts with 4 and has 9 digits
+  const padded = digits.length === 9 && digits.startsWith("4") ? "0" + digits : digits;
+
+  // Return formatted as 0123 456 789
+  return padded.replace(/(\d{4})(\d{3})(\d{3})/, "$1 $2 $3");
+};
+
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -657,12 +707,12 @@ const handleReset = () => {
           >
             Create Ticket
           </button>
-          <button
+          {/* <button
             onClick={handleDeleteAll}
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
           >
             Delete All Tickets
-          </button>
+          </button> */}
           <label className="bg-lime-300 hover:bg-lime-500 hover:text-lime-100 text-lime-900 px-4 py-2 rounded-lg font-spaceGrotesk cursor-pointer">
             Import CSV
             <input
@@ -945,7 +995,7 @@ const handleReset = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-300">
-              {currentTickets.map((row, index) => {
+              {paginatedTickets.map((row, index) => {
                 const isClosed = row.priority === "O";
                 const isSelected = selectedRows.includes(row.id);
 
@@ -985,7 +1035,9 @@ const handleReset = () => {
                           >
                             {row[key]}
                           </span>
-                        ) : (
+                        ) : key === "contactNo" ? (
+                            formatPhoneNumber(row[key])
+                        ): (
                           row[key]
                         )}
                       </td>
