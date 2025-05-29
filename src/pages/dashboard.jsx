@@ -782,12 +782,12 @@ const handleDeleteTicketNo = async () => {
           >
             Create Ticket
           </button>
-          <button
+          {/* <button
             onClick={handleDeleteTicketNo}
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
           >
             Delete All Tickets
-          </button>
+          </button> */}
           <label className="bg-lime-300 hover:bg-lime-500 hover:text-lime-100 text-lime-900 px-4 py-2 rounded-lg font-spaceGrotesk cursor-pointer">
             Import CSV
             <input
