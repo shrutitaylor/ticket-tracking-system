@@ -180,6 +180,22 @@ export default function Dashboard() {
   ];
   
   
+const statusPriority = [
+  "EMERGENCY",
+  "Under Pending",
+  "Pending Payment",
+  "Send Invoice",
+  "Waiting for Customer",
+  "Waiting for Parts",
+  "Waiting for Device",
+  "Sent to Mike",
+  "Repaired, informed",
+  "Warranty",
+  "Refund",
+  "Not Fixable / Closed",
+  "Return with update",
+  "Collected Device", // always pushed to the bottom
+];
 
   const mapCSVRowToTicket = (row) => {
   const rawDate = row["date"] || row["Date"];
@@ -386,7 +402,7 @@ export default function Dashboard() {
       
       setData(tickets);
       // console.log("Fetched tickets:", tickets);
-      setOriginalData(tickets)
+
     } catch (error) {
       console.error("Error loading tickets:", error);
     }
@@ -582,8 +598,28 @@ const handleSort = (key) => {
   setSortConfig({ key, direction });
 };
 
+const handleSortActive = () => {
+  setSortConfig({ key: 'customActiveSort', direction: 'asc' });
+};
+
 const sortedTickets = [...filteredData].sort((a, b) => {
   if (!sortConfig.key) return 0;
+
+  if (sortConfig.key === 'customActiveSort') {
+    const isCollectedA = a.priority === "O";
+    const isCollectedB = b.priority === "O";
+
+    if (isCollectedA && !isCollectedB) return 1;
+    if (!isCollectedA && isCollectedB) return -1;
+
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    if (dateB - dateA !== 0) return dateB - dateA;
+
+    const priorityA = statusPriority.indexOf(a.status);
+    const priorityB = statusPriority.indexOf(b.status);
+    return priorityA - priorityB;
+  }
 
   const aVal = a[sortConfig.key];
   const bVal = b[sortConfig.key];
@@ -627,51 +663,12 @@ useEffect(() => {
   setCurrentPage(1);
 }, [searchQuery,sortConfig]);
 
-const statusPriority = [
-  "EMERGENCY",
-  "Under Pending",
-  "Pending Payment",
-  "Send Invoice",
-  "Waiting for Customer",
-  "Waiting for Parts",
-  "Waiting for Device",
-  "Sent to Mike",
-  "Repaired, informed",
-  "Warranty",
-  "Refund",
-  "Not Fixable / Closed",
-  "Return with update",
-  "Collected Device", // always pushed to the bottom
-];
 
-const handleSortActive = () => {
-  const sorted = [...data].sort((a, b) => {
-    const isCollectedA = a.priority === "O";
-    const isCollectedB = b.priority === "O";
 
-    // Collected Device always last
-    if (isCollectedA && !isCollectedB) return 1;
-    if (!isCollectedA && isCollectedB) return -1;
-      // Then sort by date (newest first)
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      if (dateB - dateA !== 0) return dateB - dateA;
-
-    const priorityA = statusPriority.indexOf(a.status);
-    const priorityB = statusPriority.indexOf(b.status);
-    return priorityA - priorityB;
-
-  });
-
-  setData(sorted); // Or however you're updating the ticket list
-};
 
 //TO RESET DATA
-const [originalData, setOriginalData] = useState([]);
-
-
 const handleReset = () => {
-  setData(originalData);
+  handleSort("asc");
 };
 
 // Format the incoming phone numbers
