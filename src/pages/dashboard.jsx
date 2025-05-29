@@ -737,7 +737,34 @@ const handleDuplicate = async () => {
   }
 };
 
+const handleDeleteTicketNo = async () => {
+  try {
+    const q = query(collection(db, "tickets"), where("ticketNo", "==", "3290525"));
+    const snapshot = await getDocs(q);
 
+    if (snapshot.empty) {
+      alert("No tickets found with ticketNo: 3290525");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${snapshot.size} ticket(s) with ticketNo: 3290525?`
+    );
+    if (!confirmDelete) return;
+
+    const deletePromises = snapshot.docs.map((docSnap) =>
+      deleteDoc(doc(db, "tickets", docSnap.id))
+    );
+
+    await Promise.all(deletePromises);
+
+    alert(`Deleted ${snapshot.size} ticket(s) with ticketNo: 3290525`);
+    await fetchData(); // refresh UI
+  } catch (error) {
+    console.error("Error deleting tickets:", error);
+    alert("Something went wrong while deleting the tickets.");
+  }
+};
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex  mb-8">
@@ -755,12 +782,12 @@ const handleDuplicate = async () => {
           >
             Create Ticket
           </button>
-          {/* <button
-            onClick={handleDeleteAll}
+          <button
+            onClick={handleDeleteTicketNo}
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
           >
             Delete All Tickets
-          </button> */}
+          </button>
           <label className="bg-lime-300 hover:bg-lime-500 hover:text-lime-100 text-lime-900 px-4 py-2 rounded-lg font-spaceGrotesk cursor-pointer">
             Import CSV
             <input
