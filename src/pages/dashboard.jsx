@@ -226,7 +226,7 @@ const statusPriority = [
   } else {
     parsedDate = String(rawDate);
   }
-  console.log("Raw Date:", rawDate, "-> Parsed Date:", parsedDate);
+  // console.log("Raw Date:", rawDate, "-> Parsed Date:", parsedDate);
 
 
   return {
@@ -662,6 +662,7 @@ const paginatedTickets = sortedTickets.slice(
 //set first page of pagination when search or sort are in use
 useEffect(() => {
   setCurrentPage(1);
+  // console.log("current data", data);
 }, [searchQuery,sortConfig]);
 
 
@@ -722,11 +723,11 @@ const handleDuplicate = async () => {
       customerId: customerID,
     };
 
-    // Remove Firestore document ID if it exists
-    // delete duplicatedTicket.id;
+    // Remove Firestore document ID of this ticket
+    delete duplicatedTicket.id;
 
     await addDoc(collection(db, "tickets"), duplicatedTicket);
-
+    // console.log("Ticket duplicated successfully:", duplicatedTicket);
     setOpen(false);
     setIsUpdateMode(false);
     await fetchData();
@@ -747,6 +748,7 @@ const handleDuplicate = async () => {
 
       <div className="flex justify-between items-center mb-6">
         <div className="flex gap-4">
+          
           <button
             onClick={() => handleOpen()}
             className=" bg-amber-800/80 hover:bg-amber-800/40 hover:text-amber-800/80  transition-all duration-300 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
