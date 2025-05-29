@@ -11,6 +11,7 @@ import { Tooltip } from "@mui/material";
 import SendSMSButton from "../components/sendSMSButton";
 import PrintTicketButton from "../components/printTicketButton";
 import DeleteTicketButton from "../components/deleteTicketButton";
+import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 
 
 export default function Dashboard() {
@@ -686,6 +687,54 @@ const formatPhoneNumber = (phone) => {
   return padded.replace(/(\d{4})(\d{3})(\d{3})/, "$1 $2 $3");
 };
 
+//Duplicate Ticket
+const handleDuplicate = async () => {
+  try {
+    const phone = newTicket.contactNo;
+    if (!phone) {
+      alert("Contact number is required to duplicate a ticket.");
+      return;
+    }
+
+    // Check if customer exists
+    const existingCustomer = await getCustomerByPhone(phone);
+    let customerID;
+
+    if (existingCustomer) {
+      customerID = existingCustomer.data.customerId;
+    } else {
+      const newID = await getCustomerId();
+      customerID = newID;
+    }
+
+    // Format today's date
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const year = String(today.getFullYear()).slice(-2);
+    const dateStr = `${day}${month}${year}`;
+    const ticketNo = `${customerID}${dateStr}`;
+
+    const duplicatedTicket = {
+      ...newTicket,
+      ticketNo,
+      date: today.toLocaleDateString("en-GB"),
+      customerId: customerID,
+    };
+
+    // Remove Firestore document ID if it exists
+    // delete duplicatedTicket.id;
+
+    await addDoc(collection(db, "tickets"), duplicatedTicket);
+
+    setOpen(false);
+    setIsUpdateMode(false);
+    await fetchData();
+  } catch (error) {
+    console.error("Error duplicating ticket:", error);
+    alert("Something went wrong while duplicating the ticket.");
+  }
+};
 
 
   return (
@@ -869,6 +918,11 @@ const formatPhoneNumber = (phone) => {
            
             <div className="flex justify-end gap-4 mt-6">
               <div >
+              <button
+                onClick={handleDuplicate}
+                className="px-2 py-2 mr-1 rounded-lg bg-amber-300 text-amber-100 hover:bg-amber-600 hover:text-amber-300 font-spaceGrotesk"
+              ><DocumentDuplicateIcon className="w-6 h-6 inline" />
+              </button>
               <PrintTicketButton ticket={newTicket} onBeforePrint={() => setIsVisible(false)}  /></div>
               <button
                 onClick={handleClose}
