@@ -14,7 +14,7 @@ import DeleteTicketButton from "../components/deleteTicketButton";
 import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 
 
-export default function Dashboard() {
+export default function ActiveBoard() {
   const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -198,87 +198,8 @@ const statusPriority = [
   "Collected Device", // always pushed to the bottom
 ];
 
-  const mapCSVRowToTicket = (row) => {
-  const rawDate = row["date"] || row["Date"];
-  let parsedDate = "";
-
-  if (!rawDate) {
-    parsedDate = new Date().toLocaleDateString("en-GB");
-  } else if (typeof rawDate === "number") {
-    const date = XLSX.SSF.parse_date_code(rawDate);
-    parsedDate = `${String(date.m).padStart(2, "0")}/${String(date.d).padStart(2, "0")}/${date.y}`;
-  } else if (typeof rawDate === "string") {
-    const parts = rawDate.trim().split(/[\/\-]/);
-    if (parts.length === 3) {
-      let [a, b, c] = parts;
-      // Assume dd/mm/yyyy if a > 12
-      if (Number(a) > 12) {
-        parsedDate = `${a.padStart(2, "0")}/${b.padStart(2, "0")}/${c}`;
-      } else if (Number(b) > 12) {
-        parsedDate = `${b.padStart(2, "0")}/${a.padStart(2, "0")}/${c}`;
-      } else {
-        // Ambiguous, assume dd/mm/yyyy
-        parsedDate = `${a.padStart(2, "0")}/${b.padStart(2, "0")}/${c}`;
-      }
-    } else {
-      parsedDate = rawDate;
-    }
-  } else {
-    parsedDate = String(rawDate);
-  }
-  // console.log("Raw Date:", rawDate, "-> Parsed Date:", parsedDate);
 
 
-  return {
-    ticketNo: row["TicketNo"] || "",
-    customerId: row["CustomerId"] || "",
-    priority: row["priority"] || "",
-    status: row["status"] || "open",
-    name: row["name"] || "",
-    contactNo: row["contactNo"] || "",
-    device: row["device"] || "",
-    issues: row["issues"] || "",
-    price: row["price"] || "",
-    service: row["service"] || "",
-    partsUsed: row["partsUsed"] || "",
-    called: row["called"] || "",
-    notes: row["notes"] || "",
-    paid: row["paid"] || (row["status"] === "Collected Device" ? "Card" : "No"),
-    date: parsedDate,
-  };
-};
-
-
-
-
-  const handleCSVUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-  
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const data = new Uint8Array(event.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
-  
-      const tickets = jsonData.map(mapCSVRowToTicket);
-  
-      try {
-        const promises = tickets.map((ticket) => addDoc(collection(db, "tickets"), ticket));
-        await Promise.all(promises);
-        alert("Tickets imported successfully!");
-        fetchData(); // Refresh UI
-      } catch (err) {
-        console.error("Error importing tickets:", err);
-        alert("Failed to import some or all tickets.");
-      }
-    };
-  
-    reader.readAsArrayBuffer(file);
-  };
-  
   
   
   // Function to convert display name to field name
@@ -378,59 +299,41 @@ const statusPriority = [
   };
 
   const fetchData = async () => {
-    try {
+  try {
+    const querySnapshot = await getDocs(collection(db, "tickets"));
+    const tickets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      const querySnapshot = await getDocs(collection(db, "tickets"));
-      const tickets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // Sort by date descending (newest on top)
-      tickets.sort((a, b) => {
-        const parseDate = (d) => {
-          if (typeof d === "string") {
-            const [day, month, year] = d.split("/").map(Number);
-            return new Date(year, month - 1, day);
-          } else if (d instanceof Date) {
-            return d;
-          } else if (d?.seconds) {
-            // Firestore Timestamp object
-            return new Date(d.seconds * 1000);
-          } else {
-            return new Date(0); // Fallback to epoch if unknown
-          }
-        };
-      
-        return parseDate(b.date) - parseDate(a.date);
-      });
-      
-      setData(tickets);
-      // console.log("Fetched tickets:", tickets);
+    // Filter tickets with specific statuses
+    const filtered = tickets.filter(ticket =>
+      ticket.status === "Return with update" || ticket.status === "Sent to Mike"
+    );
 
-    } catch (error) {
-      console.error("Error loading tickets:", error);
-    }
-  };
-  
+    // Sort by date descending (newest on top)
+    filtered.sort((a, b) => {
+      const parseDate = (d) => {
+        if (typeof d === "string") {
+          const [day, month, year] = d.split("/").map(Number);
+          return new Date(year, month - 1, day);
+        } else if (d instanceof Date) {
+          return d;
+        } else if (d?.seconds) {
+          return new Date(d.seconds * 1000);
+        } else {
+          return new Date(0);
+        }
+      };
+
+      return parseDate(b.date) - parseDate(a.date);
+    });
+
+    setData(filtered);
+  } catch (error) {
+    console.error("Error loading tickets:", error);
+  }
+};
   useEffect(() => {
-    
     fetchData();
   }, []);
-  
-
-  const handleDeleteAll = async () => {
-    if (window.confirm("Are you sure you want to delete all tickets? This action cannot be undone.")) {
-      try {
-        const querySnapshot = await getDocs(collection(db, "tickets"));
-        const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
-        await Promise.all(deletePromises);
-        setData([]);
-        alert("All tickets have been deleted successfully!");
-      } catch (error) {
-        console.error("Error deleting tickets:", error);
-        alert("Error deleting tickets. Please try again.");
-      }
-    }
-  };
-
-  
 
   const handleOpen = async (ticket = null) => {
     if (ticket) {
@@ -464,6 +367,21 @@ const statusPriority = [
     }
     setOpen(true);
   };
+
+// Format the incoming phone numbers
+const formatPhoneNumber = (phone) => {
+  // Remove all non-digit characters
+  const digits = phone.toString().replace(/\D/g, "");
+
+  // If the number is less than 9 digits, return as-is
+  if (digits.length < 9) return phone;
+
+  // Pad the number with a leading 0 if it starts with 4 and has 9 digits
+  const padded = digits.length === 9 && digits.startsWith("4") ? "0" + digits : digits;
+
+  // Return formatted as 0123 456 789
+  return padded.replace(/(\d{4})(\d{3})(\d{3})/, "$1 $2 $3");
+};
 
   const getCustomerByPhone = async (phone) => {
   const q = query(collection(db, "tickets"), where("contactNo", "==", phone));
@@ -668,25 +586,7 @@ useEffect(() => {
 
 
 
-//TO RESET DATA
-const handleReset = () => {
-  handleSort("asc");
-};
 
-// Format the incoming phone numbers
-const formatPhoneNumber = (phone) => {
-  // Remove all non-digit characters
-  const digits = phone.toString().replace(/\D/g, "");
-
-  // If the number is less than 9 digits, return as-is
-  if (digits.length < 9) return phone;
-
-  // Pad the number with a leading 0 if it starts with 4 and has 9 digits
-  const padded = digits.length === 9 && digits.startsWith("4") ? "0" + digits : digits;
-
-  // Return formatted as 0123 456 789
-  return padded.replace(/(\d{4})(\d{3})(\d{3})/, "$1 $2 $3");
-};
 
 //Duplicate Ticket
 const handleDuplicate = async () => {
@@ -768,72 +668,13 @@ const handleDeleteTicketNo = async () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex  mb-8">
-        <h1 className="text-4xl font-aoMono text-black font-bold">
-          DASHBOARD
+        <h1 className="text-4xl uppercase font-aoMono text-black font-bold">
+          Active board
         </h1>
       </div>
 
       <div className="flex justify-between items-center mb-6">
-        <div className="flex gap-4">
-          
-          <button
-            onClick={() => handleOpen()}
-            className=" bg-amber-800/80 hover:bg-amber-800/40 hover:text-amber-800/80  transition-all duration-300 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
-          >
-            Create Ticket
-          </button>
-          <button
-            onClick={handleDeleteTicketNo}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
-          >
-            Delete All Tickets
-          </button>
-          <label className="bg-lime-300 hover:bg-lime-500 hover:text-lime-100 text-lime-900 px-4 py-2 rounded-lg font-spaceGrotesk cursor-pointer">
-            Import CSV
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleCSVUpload}
-              className="hidden"
-            />
-          </label>
-          <div className="relative group">
-          <button
-            onClick={() => setExportData(!exportData)}
-            className="bg-sky-200 hover:bg-sky-400 hover:text-sky-100 text-sky-900 p-2.5 rounded-lg font-spaceGrotesk transition-colors"
-          >
-            <ArrowDownTrayIcon height={20} width={20} />
-            <span className="absolute z-100 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
-             Export CSV
-            </span>
-          </button>
-          </div>
-          <div className="relative group">
-          <button
-            onClick={handleSortActive}
-            className="p-2.5 bg-purple-200 hover:bg-purple-400 hover:text-purple-100 text-purple-600 rounded-lg font-spaceGrotesk"
-          >
-            <FunnelIcon height={19} width={19} />
-            <span className="absolute z-100 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
-              Active filter
-            </span>
-          </button>
-          </div>
-          <div className="relative group">
-          <button
-            onClick={handleReset}
-            className="bg-amber-200 p-2.5 text-amber-800 hover:bg-amber-400 hover:text-amber-100 rounded-lg font-spaceGrotesk"
-            title="Reset to default"
-          >
-            <ArrowPathRoundedSquareIcon height={20} width={20} />
-            <span className="absolute z-100 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
-              Reset table
-            </span>
-          </button>
-          </div>
-          {exportData ? <FilteredExport/>:null}
-          
-        </div>
+        
         
 
         <div class="relative hidden md:block">

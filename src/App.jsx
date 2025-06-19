@@ -15,6 +15,7 @@ import { LoaderProvider } from './contexts/LoaderContext';
 import Loader from './components/loader';
 import Layout from './components/layout';
 import Report from './pages/report';
+import ActiveBoard from './pages/activeBoard';
 
 
 
@@ -45,6 +46,7 @@ function App() {
               <Route path="/transactions" element={user ? <Transactions /> : <Navigate to="/login" />} />
               <Route path="/users" element={<UsersTable />} />
               <Route path="/report" element={<Report />} />
+              <Route path="/active" element={<ActiveBoard />} /> 
               <Route path="/signup" element={<Signup />} />
               <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
             </Routes>
