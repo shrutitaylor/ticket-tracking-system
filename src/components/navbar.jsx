@@ -70,14 +70,14 @@ const Navbar = () => {
                           className="block px-4 py-2 uppercase text-sm text-gray-700 hover:bg-gray-200 "
                           onClick={toggleDropdown} 
                         >
-                          Dashboard
+                          Tickets
                         </a>
                         <a
                           href="/active"
                           className="block px-4 py-2 uppercase text-sm text-gray-700 hover:bg-gray-200 "
                           onClick={toggleDropdown} 
                         >
-                          Active board
+                          Dashboard
                         </a>
                       </li>
                       {/* <li>

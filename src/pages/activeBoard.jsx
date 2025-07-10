@@ -1,17 +1,11 @@
-import { useEffect, useState } from "react";
-import * as XLSX from "xlsx";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { db } from "./firebaseConfig";
 import { getAuth } from "firebase/auth";
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc,where, getDoc, query, orderBy, limit } from "firebase/firestore";
-import { useLoader } from "../contexts/LoaderContext";
-import { ArrowDownIcon, ArrowDownTrayIcon, ArrowPathIcon, ArrowPathRoundedSquareIcon, ArrowUpIcon, BarsArrowDownIcon, BarsArrowUpIcon, FunnelIcon } from "@heroicons/react/16/solid";
-import FilteredExport from "./exportData";
-import { ArrowUturnLeftIcon } from "@heroicons/react/20/solid";
-import { Tooltip } from "@mui/material";
-import SendSMSButton from "../components/sendSMSButton";
+import {  InformationCircleIcon } from "@heroicons/react/20/solid";
 import PrintTicketButton from "../components/printTicketButton";
-import DeleteTicketButton from "../components/deleteTicketButton";
 import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
+import TrelloBoard from "../components/TrelloBoard";
 
 
 export default function ActiveBoard() {
@@ -298,16 +292,23 @@ const statusPriority = [
     }
   };
 
+  const [activeTickets, setActiveTickets] = useState([]);
+  const [todayTickets, setTodayTickets] = useState([]);
+  const [monthTickets, setMonthTickets] = useState([]);
+  const [displayTickets, setDisplayTickets] = useState([]);
+
   const fetchData = async () => {
   try {
+    const today = new Date();
+    const todayStr = today.toLocaleDateString("en-GB"); // "dd/mm/yyyy"
     const querySnapshot = await getDocs(collection(db, "tickets"));
     const tickets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    // Filter tickets with specific statuses
-    const filtered = tickets.filter(ticket =>
-      ticket.status === "Return with update" || ticket.status === "Sent to Mike"
-    );
-
+    // Filter tickets CURRENT MONTH
+    // const filtered = tickets.filter(ticket =>
+    //   ticket.status === "Return with update" || ticket.status === "Sent to Mike"
+    // );
+    const filtered = tickets
     // Sort by date descending (newest on top)
     filtered.sort((a, b) => {
       const parseDate = (d) => {
@@ -325,15 +326,23 @@ const statusPriority = [
 
       return parseDate(b.date) - parseDate(a.date);
     });
-
-    setData(filtered);
+    
+    setData(tickets); // this will trigger re-render
+    setCounts(getTicketStats(tickets)); // compute stats directly here
+    setActiveTickets(tickets.filter(ticket => ticket.priority !== "O"));
+    setDisplayTickets(tickets.filter(ticket => ticket.priority !== "O"));
+    setTodayTickets(tickets.filter(ticket => ticket.date === todayStr));
+    setMonthTickets(tickets.filter(ticket => { 
+      const ticketDate = new Date(ticket.date); 
+      return (
+      ticketDate.getMonth() === today.getMonth() && ticketDate.getFullYear() === today.getFullYear())
+    }));
+    
   } catch (error) {
     console.error("Error loading tickets:", error);
   }
 };
-  useEffect(() => {
-    fetchData();
-  }, []);
+  
 
   const handleOpen = async (ticket = null) => {
     if (ticket) {
@@ -665,32 +674,80 @@ const handleDeleteTicketNo = async () => {
     alert("Something went wrong while deleting the tickets.");
   }
 };
+
+  const [counts,setCounts] =useState([]);
+  const getTicketStats = (tickets) => {
+    const today = new Date();
+    const todayStr = today.toLocaleDateString("en-GB"); // "dd/mm/yyyy"
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+
+    let todayCount = 0;
+    let activeCount = 0;
+    let thisMonthCount = 0; 
+
+    tickets.forEach((ticket) => {
+      const ticketDate = new Date(ticket.date); // assuming ticket.date is a valid date string
+
+      // Check if ticket was created today
+      if (ticket.date === todayStr) {
+        todayCount++;
+      }
+
+      // Check if ticket is active
+      if (ticket.priority && ticket.priority !== "O") {
+        activeCount++;
+      }
+
+      // Check if ticket was created this month
+      if (
+        ticketDate.getMonth() === currentMonth &&
+        ticketDate.getFullYear() === currentYear
+      ) {
+        thisMonthCount++;
+      }
+    });
+
+    return {
+      todayCount,
+      activeCount,
+      thisMonthCount,
+    };
+};
+
+
+useEffect(() => {
+    fetchData();
+    
+    
+  }, []);
+
+const handlePassedTicket = (ticket) => {
+        console.log("Data from child:", ticket);
+        handleOpen(ticket);
+      };
+const [activeTab, setActiveTab] = useState("active");
+const handleTabs = (key) => {
+        setActiveTab(key)
+        if(key == "active") {
+         setDisplayTickets(activeTickets)
+        }else if(key == "today") {
+         setDisplayTickets(todayTickets)
+        }else{
+         setDisplayTickets(monthTickets)
+        }
+      };
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex  mb-8">
         <h1 className="text-4xl uppercase font-aoMono text-black font-bold">
-          Active board
+          Dashboard
         </h1>
       </div>
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center">
         
-        
-
-        <div class="relative hidden md:block">
-            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                </svg>
-                <span class="sr-only">Search icon</span>
-            </div>
-        <input
-          type="text"
-          placeholder="Search..."
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-gray-500 focus:border-gray-500 text-black "
-        />
-        </div>
       </div>
 
       {/* Modal */}
@@ -824,242 +881,76 @@ const handleDeleteTicketNo = async () => {
       ) : (
         
         <>
-               {selectedRows.length > 0 && (
-                  <div className="flex font-spaceGrotesk items-center space-x-4 mb-4">
-                    {/* Bulk Priority */}
-                    <label htmlFor="bulk-priority">Change Priority:</label>
-                      <select
-                        id="bulk-priority"
-                        value={bulkPriority}
-                        onChange={(e) => setBulkPriority(e.target.value)}
-                        className="border px-2 py-1 rounded"
-                      >
-                        <option value="">Select Priority</option>
-                        <option value="L">Low</option>
-                        <option value="M">Medium</option>
-                        <option value="H">High</option>
-                        <option value="O">Close</option>
-                      </select>
+               
+      <div className="flex justify-center flex-row mx-auto mt-5">
+          
+            <div className="font-aoMono flex flex-col justify-center ">
+              <div className="grid grid-cols-1 sm:grid-cols-3 h-32 gap-4 p-4">
+                <button
+                  onClick={() => handleTabs("today")}
+                  className={`${
+                    activeTab === "today" ? "bg-rose-200" : "bg-stone-300"
+                  } rounded-md shadow-lg p-5 text-3xl text-left flex-col cursor-pointer hover:scale-105 transition-all duration-500`}
+                >
+                  <p className="text-lg uppercase">Today's Tickets</p>
+                  {counts["todayCount"]}
+                </button>
 
-                    {/* Bulk Status */}
-                    <label htmlFor="bulk-status">Change Status:</label>
-                      <select
-                        id="bulk-status"
-                        value={bulkStatus}
-                        onChange={(e) => setBulkStatus(e.target.value)}
-                        className="border px-2 py-1 rounded"
-                      >
-                        <option value="">Select Status</option>
-                        {Object.entries(styles).map(([statusKey]) => (
-                          <option key={statusKey} value={statusKey}>
-                            {statusKey}
-                          </option>
-                        ))}
-                      </select>
+                <div
+                  onClick={() => handleTabs("active")}
+                  className={`${
+                    activeTab === "active" ? "bg-rose-200" : "bg-stone-300"
+                  } cursor-pointer rounded-md shadow-lg text-3xl flex-col p-5 hover:scale-105 transition-all duration-500`}
+                >
+                  <p className="text-lg uppercase">ACTIVE Tickets</p>
+                  {counts["activeCount"]}
+                </div>
 
-                    {/* Change Button */}
-                    <button
-                      className="bg-lime-200 text-lime-900 px-3 py-1 rounded-lg hover:bg-lime-500 transition-all"
-                      onClick={() => {
-                        if (bulkPriority) handleBulkChange("priority", bulkPriority);
-                        if (bulkStatus) handleBulkChange("status", bulkStatus);
-                        setBulkPriority("");
-                        setBulkStatus("");
-                      }}
-                    >
-                      Change
-                    </button>
-                  </div>
-                )}
-      <div className="overflow-x-auto bg-white rounded-md shadow-lg mt-5">
-          <table className="min-w-full">
-            <thead>
+                <div
+                  onClick={() => handleTabs("month")}
+                  className={`${
+                    activeTab === "month" ? "bg-rose-200" : "bg-stone-300"
+                  } rounded-md shadow-lg text-3xl flex-col p-5 hover:scale-105 transition-all duration-500 cursor-pointer`}
+                >
+                  <p className="text-lg uppercase">This Month</p>
+                  {counts["thisMonthCount"]}
+                </div>
+              </div>
+           
+            <div className=" ">
+              <TrelloBoard paginatedTickets={data} onDataSend={handlePassedTicket} />
+            </div>
+            
+            
+          </div>
+         
+          <div className=" mt-4 bg-stone-100 font-mono rounded-lg h-[680px] overflow-hidden gap-2 flex flex-col"> 
+            <button
+            onClick={() => handleOpen()}
+            className=" bg-rose-800 hover:bg-rose-300 hover:text-rose-100  transition-all duration-300 text-rose-200 px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
+          >
+            Create Ticket
+          </button>
+            <div className="flex flex-col overflow-y-auto gap-2 p-1">
+              <h1 className="uppercase font-aoMono">{activeTab}</h1>
+            {displayTickets.map((ticket) => (
+              <>
+              <div className="bg-stone-200 text-sm min-h-[50px] overflow-hidden font-bold flex flex-col w-[150px] rounded-lg p-2 border-l-4 border-lime-300">
+                <span className="flex flex-row">{ticket["name"]}<InformationCircleIcon onClick={() => handleOpen(ticket)} className="cursor-pointer h-3 w-3 text-stone-400 mt-1 ml-2"/> </span>
+                <p className="text-xs font-thin tracking-tighter">{ticket["device"]}</p>
+              </div>
               
-              
-                <tr className="bg-gray-300">
-                <th className="px-2 py-3 text-center">
-                  <input
-                    type="checkbox"
-                    checked={selectAll}
-                    onChange={(e) => {
-                      const isChecked = e.target.checked;
-                      setSelectAll(isChecked);
-                      if (isChecked) {
-                        const allIds = currentTickets.map((row) => row.id);
-                        setSelectedRows(allIds);
-                      } else {
-                        setSelectedRows([]);
-                      }
-                    }}
-                  />
-                </th>
+              </>
+            ))}
+            </div>
+          </div>
 
-              {ticketFields.map((key) => (
-                <>
-                <th key={key} 
-                className="cursor-pointer px-2 py-3 text-center text-sm font-spaceGrotesk font-medium text-gray-500 uppercase tracking-wider"
-                onClick={() => handleSort(key)}>
-                {getDisplayName(key)}
-                    {sortConfig.key === key && (
-                        sortConfig.direction === 'asc' ? (
-                          <BarsArrowUpIcon className="w-4 h-4 inline ml-1" />
-                        ) : (
-                          <BarsArrowDownIcon className="w-4 h-4 inline ml-1" />
-                        )
-                      )}
-                </th>
-                 </>
-                ))}
-                <th className="px-2 py-3 text-left text-center text-sm font-spaceGrotesk font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-300">
-              {paginatedTickets.map((row, index) => {
-                const isClosed = row.priority === "O";
-                const isSelected = selectedRows.includes(row.id);
-
-                return (
-                  <tr
-                    key={index}
-                    className={` ${isClosed ? "bg-gray-200" : "hover:bg-gray-50"}`}
-                    // onClick={() => handleOpen(row)}
-                  >
-                    <td className="px-2 text-center py-3">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => {
-                          setSelectedRows((prev) =>
-                            prev.includes(row.id)
-                              ? prev.filter((id) => id !== row.id)
-                              : [...prev, row.id]
-                          );
-                        }}
-                      />
-                    </td>
-                    {ticketFields.map((key) => (
-                      <td
-                        key={key}
-                        className="px-2 text-center items-center py-3 whitespace-nowrap text-md font-spaceGrotesk text-gray-900"
-                      >
-                        {key === "priority" ? (
-                          <div
-                            className={`w-8 h-8 mx-auto self-align-center rounded-full flex items-center justify-center text-white font-bold ${getPriorityStyle(row[key])} `}
-                          >
-                            {row[key]}
-                          </div>
-                        ) : key === "status" ? (
-                          <span
-                            className={`text-sm font-medium px-2.5 py-0.5 rounded-full ${getStatusStyle(row[key])}`}
-                          >
-                            {row[key]}
-                          </span>
-                        ) : key === "contactNo" ? (
-                            formatPhoneNumber(row[key])
-                        ): (
-                          row[key]
-                        )}
-                      </td>
-                    ))}
-                    <td className="px-2 py-3 z-50 whitespace-nowrap text-sm flex flex-row font-spaceGrotesk">
-                      <button
-                        onClick={() => handleOpen(row)}
-                        className="bg-amber-800/80 hover:bg-amber-800/40 hover:text-amber-800/80  transition-all duration-300 text-white mr-2 px-3 py-1 rounded-lg transition-colors"
-                      >
-                        View
-                      </button>
-                      <button
-                        onClick={() =>
-                          row.paid && (row.paid.startsWith("Cash") || row.paid.startsWith("Online"))
-                            ? null : handleOpenPayModal(row)
-                            
-                        }
-                        className={`px-3 py-1 rounded-lg transition-all ${
-                          row.paid && (row.paid.startsWith("Cash") || row.paid.startsWith("Online"))
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-blue-500 hover:bg-blue-600 text-white"
-                        }`}
-                        disabled={
-                          row.paid && (row.paid.startsWith("Cash") || row.paid.startsWith("Online"))
-                        }
-                      >
-                        Pay
-                      </button>
-
-                      <SendSMSButton phone={row.contactNo} name={row.name} device={row.device} />
-                      { user.email == "iolabs.au.ops@gmail.com" &&
-                      <DeleteTicketButton
-                        ticketId={row.id}
-                        onDeleted={(deletedId) => {
-                          setData(prev => prev.filter(ticket => ticket.id !== deletedId));
-                        }}
-                      />}
-                    </td>
-                    
-                  </tr>
-                );
-              })}
-            </tbody>
-
-          </table>
         </div>
         </>
       )}
-      <div className="flex justify-center items-center mt-4 gap-4">
-        <button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          className="px-3 py-1  bg-gray-300 hover:bg-gray-400 rounded disabled:opacity-50"
-        >
-          Previous
-        </button>
+      
 
-        <span className="font-spaceGrotesk text-gray-700">
-          Page {currentPage} of {Math.ceil(filteredData.length / ticketsPerPage)}
-        </span>
-
-        <button
-          onClick={() =>
-            setCurrentPage((prev) =>
-              prev < Math.ceil(filteredData.length / ticketsPerPage) ? prev + 1 : prev
-            )
-          }
-          disabled={currentPage === Math.ceil(filteredData.length / ticketsPerPage)}
-          className="px-3 py-1 bg-gray-300 hover:bg-gray-400 rounded disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
-
-      {payModalOpen && selectedTicket && (
-            <div className="fixed inset-0 bg-black font-aoMono uppercase bg-opacity-50 flex items-center justify-center">
-              <div className="bg-white rounded-lg p-6 w-full max-w-md text-center">
-                <h2 className="text-xl font-bold mb-4">Select Payment Method</h2>
-                <div className="flex justify-around">
-                  <button
-                    onClick={() => handlePayment("Cash - "+ new Date().toLocaleDateString("en-GB"))}
-                    className="bg-green-500 hover:bg-green-600 uppercase text-white px-4 pt-1.5 rounded-lg"
-                  >
-                    Pay by Cash
-                  </button>
-                  <button
-                    onClick={() => handlePayment("Online - "+ new Date().toLocaleDateString("en-GB"))}
-                    className="bg-blue-500 hover:bg-blue-600 uppercase text-white px-4 pt-1.5 rounded-lg"
-                  >
-                    Pay by Card
-                  </button>
-                </div>
-                <button
-                  onClick={() => setPayModalOpen(false)}
-                  className="mt-4 text-gray-600 hover:text-gray-800"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
+   
 
     </div>
   );
