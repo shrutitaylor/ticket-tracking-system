@@ -949,6 +949,23 @@ const handleDeleteTicketNo = async () => {
            
             <div className="flex justify-end gap-4 mt-6">
               <div >
+                <button
+                        onClick={() =>
+                          newTicket.paid && (newTicket.paid.startsWith("Cash") || newTicket.paid.startsWith("Online"))
+                            ? null : handleOpenPayModal(newTicket)
+                            
+                        }
+                        className={`px-3 py-1 rounded-lg transition-all mx-2 ${
+                          newTicket.paid && (newTicket.paid.startsWith("Cash") || newTicket.paid.startsWith("Online"))
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-blue-500 hover:bg-blue-600 text-white"
+                        }`}
+                        disabled={
+                          newTicket.paid && (newTicket.paid.startsWith("Cash") || newTicket.paid.startsWith("Online"))
+                        }
+                      >
+                        Pay
+                      </button>
               <button
                 onClick={handleDuplicate}
                 className="px-2 py-2 mr-1 rounded-lg bg-amber-300 text-amber-100 hover:bg-amber-600 hover:text-amber-300 font-spaceGrotesk"
@@ -1199,7 +1216,7 @@ const handleDeleteTicketNo = async () => {
       </div>
 
       {payModalOpen && selectedTicket && (
-            <div className="fixed inset-0 bg-black font-aoMono uppercase bg-opacity-50 flex items-center justify-center">
+            <div className="fixed z-50 inset-0 bg-black font-aoMono uppercase bg-opacity-50 flex items-center justify-center">
               <div className="bg-white rounded-lg p-6 w-full max-w-md text-center">
                 <h2 className="text-xl font-bold mb-4">Select Payment Method</h2>
                 <div className="flex justify-around">
