@@ -35,7 +35,7 @@ const Navbar = () => {
         <a href="#" className="flex items-center space-x-2 rtl:space-x-reverse">
           <img src={logo} className="h-14" alt="Logo" />
         </a>
-        <div className="hidden w-full md:block md:w-auto" id="navbar-default">
+        <div className="w-auto" id="navbar-default">
           <ul className="font-medium flex flex-col p-4 md:p-0 mt-4  md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white ">
             {user ? (
               <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
@@ -54,7 +54,7 @@ const Navbar = () => {
 
                 {/* Dropdown menu */}
                 {isDropdownOpen && (
-                  <div className="z-100 absolute w-96 right-10 top-14  my-4 text-base list-none bg-gray-100 divide-y divide-gray-300 rounded-lg shadow-sm ">
+                  <div className="z-100 absolute sm:w-96 right-10 top-14  my-4 text-base list-none bg-gray-100 divide-y divide-gray-300 rounded-lg shadow-sm ">
                     <div className="px-4 py-3">
                       <span className="block text-md uppercase text-gray-900 dark:text-white">
                         {firstName}
