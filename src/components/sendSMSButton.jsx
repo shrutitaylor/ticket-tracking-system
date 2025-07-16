@@ -4,12 +4,12 @@ import React, { useState, useEffect } from 'react';
 
 // Move this outside the component
 const defaultMessages = {
-  received: "Hi {{name}}!\n\nWe are reaching out to you with confirmation of receipt of your {{device}}.\nAny further updates will be sent to you via this channel hereafter.\n\nThanks,\nIO Labs Support",
-  inProgress: "Hi {{name}}!\n\nWe're reaching out to inform you that the repair of your {{device}} in progress. \nYou will receive a notification shortly once the device ready for collection.\n\nRegards,\nIO Labs Support",
-  ready: "Hi {{name}},\n\nWe're reaching out to inform you that your {{device}} is ready for collection. Please make your way to the store at your earliest convenience.\n\nRegards,\nIO Labs Support",
+  received: "Hi {{name}}!\n\nWe are reaching out to you with confirmation of receipt of your {{device}}.\nAny further updates will be sent to you via this channel hereafter.\n\nThanks,\nIO Labs Support\n+61 466 987 114",
+  inProgress: "Hi {{name}}!\n\nWe're reaching out to inform you that the repair of your {{device}} in progress. \nYou will receive a notification shortly once the device ready for collection.\n\nRegards,\nIO Labs Support\n+61 466 987 114",
+  ready: "Hi {{name}},\n\nWe're reaching out to inform you that your {{device}} is ready for collection. Please make your way to the store at your earliest convenience.\n\nRegards,\nIO Labs Support\n+61 466 987 114",
   // delayed: "Hi {{name}},\nyour repair is taking longer than expected. We appreciate your patience and will update you soon.",
   // followUp: "Hi {{name}},\njust checking in. Let us know if you have any questions about your recent repair.",
-  collected: "Hi {{name}}!\n\nThank you for choosing IO Labs for the repair of your {{device}}.\nWe wish you and your device a productive day!\n\nPlease leave us a feedback of our services on google reviews at your convenience.\n\nhttps://g.page/r/CSqH1h-wVtqyEBM/review\n\nCheers,\nIO Labs Support"
+  collected: "Hi {{name}}!\n\nThank you for choosing IO Labs for the repair of your {{device}}.\nWe wish you and your device a productive day!\n\nPlease leave us a feedback of our services on google reviews at your convenience.\n\nhttps://g.page/r/CSqH1h-wVtqyEBM/review\n\nCheers,\nIO Labs Support\n+61 466 987 114"
 };
 
 const formatPhoneNumber = (phone) => {
