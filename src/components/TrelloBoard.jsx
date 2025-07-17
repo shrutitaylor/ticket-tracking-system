@@ -62,18 +62,18 @@ const TrelloBoard = (props) => {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex font-mono gap-4 justify-center mx-auto p-4">
+      <div className="flex font-mono grid md:grid-cols-4 grid-cols-2 gap-4 justify-center mx-auto p-4">
         {statusOrder.map((status) => (
           <Droppable droppableId={status} key={status}>
             {(provided, snapshot) => (
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className={`flex-shrink-0 rounded-lg shadow p-3 transition-all duration-300 ${
+                className={`flex-shrink-0 relative h-44 md:h-auto overflow-auto rounded-lg shadow p-3 transition-all duration-300 ${
                   snapshot.isDraggingOver ? "bg-lime-400" : "bg-stone-100"
                 }`}
               >
-                <h2 className="text-stone-700 font-bold text-lg mb-3">{status}</h2>
+                <h2 className="text-stone-700 font-bold text-sm md:text-lg mb-3">{status}</h2>
                 <div className="flex flex-col gap-3 min-h-[50px]">
                   {(columns[status] || []).map((ticket, index) => (
                     <Draggable key={ticket.id} draggableId={ticket.id.toString()} index={index}>
@@ -92,7 +92,7 @@ const TrelloBoard = (props) => {
                             snapshot.isDragging ? "scale-105 bg-opacity-80" : ""
                           }`}
                         >
-                          <p className="font-semibold text-sm flex flex-row">{ticket.name} <InformationCircleIcon onClick={() => props.onDataSend(ticket)} className="cursor-pointer h-3 w-3 text-stone-400 mt-1 ml-2"/> </p>
+                          <p className="font-semibold text-sm md:text-sm flex flex-row">{ticket.name} <InformationCircleIcon onClick={() => props.onDataSend(ticket)} className="cursor-pointer h-3 w-3 text-stone-400 mt-1 ml-2"/> </p>
                           <p className="text-xs text-stone-600 tracking-tighter">Device: {ticket.device}</p>
                         </div>
                       )}

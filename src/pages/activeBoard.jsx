@@ -739,16 +739,14 @@ const handleTabs = (key) => {
         }
       };
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container  mx-auto px-4 py-8">
       <div className="flex  mb-8">
         <h1 className="text-4xl uppercase font-aoMono text-black font-bold">
           Dashboard
         </h1>
       </div>
 
-      <div className="flex justify-between items-center">
-        
-      </div>
+      
 
       {/* Modal */}
       {open && 
@@ -882,17 +880,17 @@ const handleTabs = (key) => {
         
         <>
                
-      <div className="flex justify-center flex-row mx-auto mt-5">
+      <div className="flex justify-center flex-col lg:flex-row mx-auto mt-5">
           
             <div className="font-aoMono flex flex-col justify-center ">
-              <div className="grid grid-cols-1 sm:grid-cols-3 h-32 gap-4 p-4">
+              <div className="grid grid-cols-3 h-24  sm:h-32 overflow-hidden gap-4 p-4">
                 <button
                   onClick={() => handleTabs("today")}
                   className={`${
                     activeTab === "today" ? "bg-rose-200" : "bg-stone-300"
-                  } rounded-md shadow-lg p-5 text-3xl text-left flex-col cursor-pointer hover:scale-105 transition-all duration-500`}
+                  } rounded-md shadow-lg p-2 sm:p-5 text-sm sm:text-3xl text-left flex-col cursor-pointer hover:scale-105 transition-all duration-500`}
                 >
-                  <p className="text-lg uppercase">Today's Tickets</p>
+                  <p className="text-xs sm:text-lg  uppercase">Today's Tickets</p>
                   {counts["todayCount"]}
                 </button>
 
@@ -900,9 +898,9 @@ const handleTabs = (key) => {
                   onClick={() => handleTabs("active")}
                   className={`${
                     activeTab === "active" ? "bg-rose-200" : "bg-stone-300"
-                  } cursor-pointer rounded-md shadow-lg text-3xl flex-col p-5 hover:scale-105 transition-all duration-500`}
+                  } cursor-pointer rounded-md shadow-lg text-sm sm:text-3xl flex-col p-2 sm:p-5 hover:scale-105 transition-all duration-500`}
                 >
-                  <p className="text-lg uppercase">ACTIVE Tickets</p>
+                  <p className="text-xs sm:text-lg  uppercase">ACTIVE Tickets</p>
                   {counts["activeCount"]}
                 </div>
 
@@ -910,9 +908,9 @@ const handleTabs = (key) => {
                   onClick={() => handleTabs("month")}
                   className={`${
                     activeTab === "month" ? "bg-rose-200" : "bg-stone-300"
-                  } rounded-md shadow-lg text-3xl flex-col p-5 hover:scale-105 transition-all duration-500 cursor-pointer`}
+                  } rounded-md shadow-lg text-sm sm:text-3xl flex-col p-2 sm:p-5 hover:scale-105 transition-all duration-500 cursor-pointer`}
                 >
-                  <p className="text-lg uppercase">This Month</p>
+                  <p className="text-xs sm:text-lg uppercase">This Month</p>
                   {counts["thisMonthCount"]}
                 </div>
               </div>
@@ -924,7 +922,7 @@ const handleTabs = (key) => {
             
           </div>
          
-          <div className=" mt-4 bg-stone-100 font-mono rounded-lg h-[680px] overflow-hidden gap-2 flex flex-col"> 
+          <div className=" mt-4 bg-stone-100 font-mono rounded-lg h-[50vh] sm:h-[680px] overflow-hidden gap-2 flex flex-col"> 
             <button
             onClick={() => handleOpen()}
             className=" bg-rose-800 hover:bg-rose-300 hover:text-rose-100  transition-all duration-300 text-rose-200 px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
@@ -935,7 +933,7 @@ const handleTabs = (key) => {
               <h1 className="uppercase font-aoMono">{activeTab}</h1>
             {displayTickets.map((ticket) => (
               <>
-              <div className="bg-stone-200 text-sm min-h-[50px] overflow-hidden font-bold flex flex-col w-[150px] rounded-lg p-2 border-l-4 border-lime-300">
+              <div className="bg-stone-200 text-sm min-h-[50px] overflow-hidden font-bold flex flex-col w-full md:w-[150px] rounded-lg p-2 border-l-4 border-lime-300">
                 <span className="flex flex-row">{ticket["name"]}<InformationCircleIcon onClick={() => handleOpen(ticket)} className="cursor-pointer h-3 w-3 text-stone-400 mt-1 ml-2"/> </span>
                 <p className="text-xs font-thin tracking-tighter">{ticket["device"]}</p>
               </div>
