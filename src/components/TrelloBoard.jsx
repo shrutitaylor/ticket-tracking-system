@@ -92,7 +92,7 @@ const TrelloBoard = (props) => {
                             snapshot.isDragging ? "scale-105 bg-opacity-80" : ""
                           }`}
                         >
-                          <p className="font-semibold text-sm md:text-sm flex flex-row">{ticket.name} <InformationCircleIcon onClick={() => props.onDataSend(ticket)} className="cursor-pointer h-3 w-3 text-stone-400 mt-1 ml-2"/> </p>
+                          <p className="font-semibold text-xs md:text-sm flex flex-row">{ticket.name} <InformationCircleIcon onClick={() => props.onDataSend(ticket)} className="cursor-pointer h-3 w-3 text-stone-400 mt-1 ml-0.5 sm:ml-2"/> </p>
                           <p className="text-xs text-stone-600 tracking-tighter">Device: {ticket.device}</p>
                         </div>
                       )}
