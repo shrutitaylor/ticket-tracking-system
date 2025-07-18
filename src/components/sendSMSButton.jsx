@@ -79,7 +79,7 @@ const SendSMSButton = ({ phone, name, device}) => {
 
       {showModal && (
         <div className="fixed inset-0 bg-black  bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 min-w-[700px] rounded shadow-lg max-w-sm w-full">
+          <div className="bg-white p-4 sm:p-8 w-full sm:min-w-[700px] rounded shadow-lg max-w-sm w-full">
             <h2 className="text-lg font-semibold mb-2">Send SMS</h2>
             <p ><strong>Name:</strong> {name}</p>
             <p><strong>Phone:</strong> {formatPhoneNumber(phone)}</p>

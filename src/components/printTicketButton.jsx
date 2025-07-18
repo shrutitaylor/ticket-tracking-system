@@ -49,9 +49,9 @@ const PrintTicketButton = ({ ticket, onBeforePrint }) => {
     <>
       <button
         onClick={() => setShowPreview(true)}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        className="hidden sm:block bg-blue-600 text-white h-8 sm:h-10 text-xs sm:text-lg px-4 py-2 rounded hover:bg-blue-700"
       >
-        Show Ticket & Generate PDF
+        Show Ticket
       </button>
 
       {/* Modal */}
