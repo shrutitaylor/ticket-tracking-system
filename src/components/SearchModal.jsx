@@ -6,20 +6,26 @@ export default function SearchModal({ tickets, handleOpen }) {
   const [selectedTicket, setSelectedTicket] = useState([]);
 
     const handleSearch = (e) => {
-        const value = e.target.value;
-        setSearchTerm(value);
+  const value = e.target.value.toLowerCase();
+  setSearchTerm(value);
 
-        if (value.trim() === "") {
-            setSelectedTicket([]); // clear results
-            return;
-        }
+  if (value.trim() === "") {
+    setSelectedTicket([]); // clear results
+    return;
+  }
 
-        const found = tickets.filter(ticket =>
-            ticket.name?.toLowerCase().includes(value.toLowerCase())
-        );
+  const found = tickets.filter(ticket => {
+ 
+    const nameMatch = ticket.name?.toLowerCase().includes(value);
+    const phoneMatch = ticket.contactNo?.toString().toLowerCase().includes(value);
+    const dateMatch = ticket.date?.toLowerCase().includes(value);
 
-        setSelectedTicket(found);
-    };
+    return nameMatch || phoneMatch || dateMatch;
+  });
+
+  setSelectedTicket(found);
+};
+
 
 
   // const handleOpen = (ticket) => {
