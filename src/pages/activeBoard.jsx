@@ -7,6 +7,8 @@ import PrintTicketButton from "../components/printTicketButton";
 import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import TrelloBoard from "../components/TrelloBoard";
 import SendSMSButton from "../components/sendSMSButton";
+import SearchModal from "../components/SearchModal";
+import ViewModal from "../components/ViewModal";
 
 
 export default function ActiveBoard() {
@@ -64,8 +66,6 @@ export default function ActiveBoard() {
     device: "",
     issues: "",
     price: "",
-    service: "",
-    partsUsed: "",
     called: "",
     notes: "",
     date: "",
@@ -91,8 +91,6 @@ export default function ActiveBoard() {
     "device",
     "issues",
     "price",
-    "service",
-    "partsUsed",
     "called",
     "notes",
     "paid",
@@ -746,147 +744,150 @@ const handleTabs = (key) => {
           Dashboard
         </h1>
       </div>
-
+      <div className="flex justify-center flex-col lg:flex-row mx-auto h-12 mx-2 sm:mx-14 rounded-lg">
+      <SearchModal tickets={data} handleOpen={handleOpen} />
+      </div>
       
 
      {/* Modal */}
       {open && 
-        <div className="fixed inset-0 w-screen font-spaceGrotesk z-50 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white sm:mt-28 max-w-[90vw] rounded-lg p-2 sm:p-6 sm:w-full sm:max-w-2xl">
+      <ViewModal updateTicketFields={updateTicketFields} newTicket={newTicket} user={user} handleSubmit={handleSubmit} handleOpenPayModal={handleOpenPayModal} handleDuplicate={handleDuplicate} handleChange={handleChange} handleClose={handleClose} isUpdateMode={isUpdateMode} />
+        // <div className="fixed inset-0 w-screen font-spaceGrotesk z-50 bg-black bg-opacity-50 flex items-center justify-center">
+        //   <div className="bg-white sm:mt-28 max-w-[90vw] rounded-lg p-2 sm:p-6 sm:w-full sm:max-w-2xl">
          
-              {isVisible && (
-                <>
-            <h2 className="text-lg flex flex-row justify-between sm:text-2xl font-spaceGrotesk mb-4">
-              {isUpdateMode ? "Update Ticket" : "Create Ticket"}
-              <button
-                onClick={handleClose}
-                className="text-sm px-2 text-gray-600 hover:text-red-800 hover hover:bg-red-200 font-spaceGrotesk"
-              >
-                X
-              </button>
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3  gap-4">
-            {updateTicketFields.map((key) => {
-              const value = newTicket[key];
-              return (
-                <div key={key} className="col-span-1">
-                  <label className="block text-xs sm:text-sm font-spaceGrotesk mb-1">{getDisplayName(key)}</label>
-                  {key === "priority" ? (
-                    <div className="flex gap-2 sm:gap-4">
-                      {["H", "M", "L", "O"].map((p) => (
-                        <label key={p} className="flex items-center cursor-pointer">
-                          <input
-                            type="radio"
-                            name="Priority"
-                            value={p}
-                            checked={value === p}
-                            onChange={handleChange}
-                            className="hidden"
-                          />
-                          <div className={`sm:w-8 sm:h-8 h-6 w-6 rounded-full flex items-center justify-center text-white font-bold ${
-                            value === p ? getPriorityStyle(p) : "bg-gray-300"
-                          }`}>
-                            {p}
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  ) : key === "status" ? (
-                    <select
-                      name="Status"
-                      value={value}
-                      onChange={handleChange}
-                      className="w-full text-xs sm:text-sm  px-3 py-1 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk"
-                    >
-                    {Object.entries(styles).map(([statusKey]) => (
-                      <option key={statusKey} value={statusKey}>{statusKey}</option> 
-                    ))}
-                    </select>
-                  ) : key === "device" ? (
-                    <>
-                      <input
-                        list="device-options"
-                        name={getDisplayName(key)}
-                        value={value}
-                        onChange={handleChange}
-                        className="w-full text-xs sm:text-sm  px-3 py-1 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk"
-                      />
-                      <datalist id="device-options">
-                        {phoneFields.map((phone) => (
-                          <option key={phone} value={phone} />
-                        ))}
-                      </datalist>
-                    </>
-                  ) : key === "notes" ? (
-                    <textarea
-                      type="text"
-                      name={getDisplayName(key)}
-                      value={value}
-                      onChange={handleChange}
-                      disabled={key === "date" || key === "ticketNo"}
-                      className={`w-full text-xs sm:text-sm  px-3 py-1 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk ${
-                        (key === "date" || key === "ticketNo") ? "bg-gray-100" : ""
-                      }`}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      name={getDisplayName(key)}
-                      value={value}
-                      onChange={handleChange}
-                      disabled={ user.email !== "iolabs.au.ops@gmail.com" &&   key === "date" || key === "ticketNo"}
-                      className={`w-full text-xs sm:text-sm  px-3 py-1 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk ${
-                        (key === "date" || key === "ticketNo") ? "bg-gray-100" : ""
-                      }`}
-                    />
-                  )}
-                </div>
+        //       {isVisible && (
+        //         <>
+        //     <h2 className="text-lg flex flex-row justify-between sm:text-2xl font-spaceGrotesk mb-4">
+        //       {isUpdateMode ? "Update Ticket" : "Create Ticket"}
+        //       <button
+        //         onClick={handleClose}
+        //         className="text-sm px-2 text-gray-600 hover:text-red-800 hover hover:bg-red-200 font-spaceGrotesk"
+        //       >
+        //         X
+        //       </button>
+        //     </h2>
+        //     <div className="grid grid-cols-2 sm:grid-cols-3  gap-4">
+        //     {updateTicketFields.map((key) => {
+        //       const value = newTicket[key];
+        //       return (
+        //         <div key={key} className="col-span-1">
+        //           <label className="block text-xs sm:text-sm font-spaceGrotesk mb-1">{getDisplayName(key)}</label>
+        //           {key === "priority" ? (
+        //             <div className="flex gap-2 sm:gap-4">
+        //               {["H", "M", "L", "O"].map((p) => (
+        //                 <label key={p} className="flex items-center cursor-pointer">
+        //                   <input
+        //                     type="radio"
+        //                     name="Priority"
+        //                     value={p}
+        //                     checked={value === p}
+        //                     onChange={handleChange}
+        //                     className="hidden"
+        //                   />
+        //                   <div className={`sm:w-8 sm:h-8 h-6 w-6 rounded-full flex items-center justify-center text-white font-bold ${
+        //                     value === p ? getPriorityStyle(p) : "bg-gray-300"
+        //                   }`}>
+        //                     {p}
+        //                   </div>
+        //                 </label>
+        //               ))}
+        //             </div>
+        //           ) : key === "status" ? (
+        //             <select
+        //               name="Status"
+        //               value={value}
+        //               onChange={handleChange}
+        //               className="w-full text-xs sm:text-sm  px-3 py-1 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk"
+        //             >
+        //             {Object.entries(styles).map(([statusKey]) => (
+        //               <option key={statusKey} value={statusKey}>{statusKey}</option> 
+        //             ))}
+        //             </select>
+        //           ) : key === "device" ? (
+        //             <>
+        //               <input
+        //                 list="device-options"
+        //                 name={getDisplayName(key)}
+        //                 value={value}
+        //                 onChange={handleChange}
+        //                 className="w-full text-xs sm:text-sm  px-3 py-1 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk"
+        //               />
+        //               <datalist id="device-options">
+        //                 {phoneFields.map((phone) => (
+        //                   <option key={phone} value={phone} />
+        //                 ))}
+        //               </datalist>
+        //             </>
+        //           ) : key === "notes" ? (
+        //             <textarea
+        //               type="text"
+        //               name={getDisplayName(key)}
+        //               value={value}
+        //               onChange={handleChange}
+        //               disabled={key === "date" || key === "ticketNo"}
+        //               className={`w-full text-xs sm:text-sm  px-3 py-1 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk ${
+        //                 (key === "date" || key === "ticketNo") ? "bg-gray-100" : ""
+        //               }`}
+        //             />
+        //           ) : (
+        //             <input
+        //               type="text"
+        //               name={getDisplayName(key)}
+        //               value={value}
+        //               onChange={handleChange}
+        //               disabled={ user.email !== "iolabs.au.ops@gmail.com" &&   key === "date" || key === "ticketNo"}
+        //               className={`w-full text-xs sm:text-sm  px-3 py-1 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-spaceGrotesk ${
+        //                 (key === "date" || key === "ticketNo") ? "bg-gray-100" : ""
+        //               }`}
+        //             />
+        //           )}
+        //         </div>
                 
-              );
+        //       );
               
-            })}
+        //     })}
 
-            </div>
+        //     </div>
            
-            <div className="flex justify-end gap-4 mt-6">
-              <div className="flex flex-row" >
-                <SendSMSButton phone={newTicket.contactNo} name={newTicket.name} device={newTicket.device} />
-                <button
-                        onClick={() =>
-                          newTicket.paid && (newTicket.paid.startsWith("Cash") || newTicket.paid.startsWith("Online"))
-                            ? null : handleOpenPayModal(newTicket)
+        //     <div className="flex justify-end gap-4 mt-6">
+        //       <div className="flex flex-row" >
+        //         <SendSMSButton phone={newTicket.contactNo} name={newTicket.name} device={newTicket.device} />
+        //         <button
+        //                 onClick={() =>
+        //                   newTicket.paid && (newTicket.paid.startsWith("Cash") || newTicket.paid.startsWith("Online"))
+        //                     ? null : handleOpenPayModal(newTicket)
                             
-                        }
-                        className={`px-3 py-1 h-8 sm:h-10 rounded-lg transition-all mx-2 ${
-                          newTicket.paid && (newTicket.paid.startsWith("Cash") || newTicket.paid.startsWith("Online"))
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-blue-500 hover:bg-blue-600 text-white"
-                        }`}
-                        disabled={
-                          newTicket.paid && (newTicket.paid.startsWith("Cash") || newTicket.paid.startsWith("Online"))
-                        }
-                      >
-                        Pay
-                      </button>
-              <button
-                onClick={handleDuplicate}
-                className=  "px-1 pb-1 sm:pb-2 sm:p-2  mr-1 rounded-lg bg-amber-300 text-amber-100 hover:bg-amber-600 hover:text-amber-300 font-spaceGrotesk"
-              ><DocumentDuplicateIcon className="h-4 w-4 sm:w-6 sm:h-6 inline" />
-              </button>
-              <PrintTicketButton ticket={newTicket} onBeforePrint={() => setIsVisible(false)}  /></div>
+        //                 }
+        //                 className={`px-3 py-1 h-8 sm:h-10 rounded-lg transition-all mx-2 ${
+        //                   newTicket.paid && (newTicket.paid.startsWith("Cash") || newTicket.paid.startsWith("Online"))
+        //                     ? "bg-gray-400 cursor-not-allowed"
+        //                     : "bg-blue-500 hover:bg-blue-600 text-white"
+        //                 }`}
+        //                 disabled={
+        //                   newTicket.paid && (newTicket.paid.startsWith("Cash") || newTicket.paid.startsWith("Online"))
+        //                 }
+        //               >
+        //                 Pay
+        //               </button>
+        //       <button
+        //         onClick={handleDuplicate}
+        //         className=  "px-1 pb-1 sm:pb-2 sm:p-2  mr-1 rounded-lg bg-amber-300 text-amber-100 hover:bg-amber-600 hover:text-amber-300 font-spaceGrotesk"
+        //       ><DocumentDuplicateIcon className="h-4 w-4 sm:w-6 sm:h-6 inline" />
+        //       </button>
+        //       <PrintTicketButton ticket={newTicket} onBeforePrint={() => setIsVisible(false)}  /></div>
               
-              <button
-                onClick={handleSubmit}
-                className="bg-blue-500 hover:bg-blue-600 text-white h-8 sm:h-10  px-4 sm:py-2 rounded-lg font-spaceGrotesk"
-              >
-                {isUpdateMode ? "Update" : "Submit"}
-              </button>
-            </div>
+        //       <button
+        //         onClick={handleSubmit}
+        //         className="bg-blue-500 hover:bg-blue-600 text-white h-8 sm:h-10  px-4 sm:py-2 rounded-lg font-spaceGrotesk"
+        //       >
+        //         {isUpdateMode ? "Update" : "Submit"}
+        //       </button>
+        //     </div>
           
-            </> )}
-          </div>
+        //     </> )}
+        //   </div>
           
-        </div>
+        // </div>
 }
 
       {/* Table */}
@@ -907,7 +908,7 @@ const handleTabs = (key) => {
                 <button
                   onClick={() => handleTabs("today")}
                   className={`${
-                    activeTab === "today" ? "bg-rose-200" : "bg-stone-300"
+                    activeTab === "today" ? "text-white bg-gradient-to-r from-[#f2537e] via-[#d44f8a] to-[#b24796]" : "bg-stone-300"
                   } rounded-md shadow-lg p-2 sm:p-5 text-sm sm:text-3xl text-left flex-col cursor-pointer hover:scale-105 transition-all duration-500`}
                 >
                   <p className="text-xs sm:text-lg  uppercase">Today's Tickets</p>
@@ -917,7 +918,7 @@ const handleTabs = (key) => {
                 <div
                   onClick={() => handleTabs("active")}
                   className={`${
-                    activeTab === "active" ? "bg-rose-200" : "bg-stone-300"
+                    activeTab === "active" ?  "text-white bg-gradient-to-r from-[#f2537e] via-[#d44f8a] to-[#b24796]"  : "bg-stone-300"
                   } cursor-pointer rounded-md shadow-lg text-sm sm:text-3xl flex-col p-2 sm:p-5 hover:scale-105 transition-all duration-500`}
                 >
                   <p className="text-xs sm:text-lg  uppercase">ACTIVE Tickets</p>
@@ -927,7 +928,7 @@ const handleTabs = (key) => {
                 <div
                   onClick={() => handleTabs("month")}
                   className={`${
-                    activeTab === "month" ? "bg-rose-200" : "bg-stone-300"
+                    activeTab === "month" ?  "text-white bg-gradient-to-r from-[#f2537e] via-[#d44f8a] to-[#b24796]" : "bg-stone-300"
                   } rounded-md shadow-lg text-sm sm:text-3xl flex-col p-2 sm:p-5 hover:scale-105 transition-all duration-500 cursor-pointer`}
                 >
                   <p className="text-xs sm:text-lg uppercase">This Month</p>
@@ -945,7 +946,7 @@ const handleTabs = (key) => {
           <div className=" mt-4 bg-stone-100 font-mono rounded-lg h-[50vh] sm:h-[680px] overflow-hidden gap-2 flex flex-col"> 
             <button
             onClick={() => handleOpen()}
-            className=" bg-rose-800 hover:bg-rose-300 hover:text-rose-100  transition-all duration-300 text-rose-200 px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
+            className=" bg-gradient-to-r from-[#f2537e] via-[#d44f8a] to-[#b24796] hover:scale-105 transition-all duration-300 text-rose-100 px-4 py-2 rounded-lg font-spaceGrotesk transition-colors"
           >
             Create Ticket
           </button>

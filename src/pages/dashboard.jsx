@@ -71,8 +71,6 @@ export default function Dashboard() {
     device: "",
     issues: "",
     price: "",
-    service: "",
-    partsUsed: "",
     called: "",
     notes: "",
     date: "",
@@ -98,8 +96,6 @@ export default function Dashboard() {
     "device",
     "issues",
     "price",
-    "service",
-    "partsUsed",
     "called",
     "notes",
     "paid",
@@ -978,7 +974,9 @@ const handleDeleteTicketNo = async () => {
                 className=  "px-1 pb-1 sm:pb-2 sm:p-2  mr-1 rounded-lg bg-amber-300 text-amber-100 hover:bg-amber-600 hover:text-amber-300 font-spaceGrotesk"
               ><DocumentDuplicateIcon className="h-4 w-4 sm:w-6 sm:h-6 inline" />
               </button>
-              <PrintTicketButton ticket={newTicket} onBeforePrint={() => setIsVisible(false)}  /></div>
+              {/* <PrintTicketButton ticket={newTicket} onBeforePrint={() => setIsVisible(false)}  /> */}
+
+              </div>
               
               <button
                 onClick={handleSubmit}
