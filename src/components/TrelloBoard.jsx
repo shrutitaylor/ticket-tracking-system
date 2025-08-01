@@ -41,8 +41,9 @@ const TrelloBoard = (props) => {
 
     if (sourceCol === destCol && source.index === destination.index) return;
 
-    const sourceItems = Array.from(columns[sourceCol]);
-    const destItems = Array.from(columns[destCol]);
+    const sourceItems = Array.from(columns[sourceCol] || []);
+    const destItems = Array.from(columns[destCol] || []);
+
     const [movedItem] = sourceItems.splice(source.index, 1);
     const confirmed = window.confirm(`Do you want to move "${movedItem.name}" to "${destCol}"?`);
     if (!confirmed) return;
