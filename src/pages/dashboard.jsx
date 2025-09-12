@@ -1031,7 +1031,7 @@ const handleDeleteTicketNo = async () => {
                       </button>
 
                       <SendSMSButton phone={row.contactNo} name={row.name} device={row.device} />
-                      { user.email != "iolabs.au.ops@gmail.com" &&
+                      { user.email == "iolabs.au.ops@gmail.com" &&
                       <DeleteTicketButton
                         ticketId={row.id}
                         onDeleted={(deletedId) => {
