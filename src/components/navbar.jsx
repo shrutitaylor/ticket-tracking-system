@@ -79,6 +79,13 @@ const Navbar = () => {
                         >
                           Dashboard
                         </a>
+                        <a
+                          href="/recyclebin"
+                          className="block px-4 py-2 uppercase text-sm text-gray-700 hover:bg-gray-200 "
+                          onClick={toggleDropdown} 
+                        >
+                          Recycle Bin
+                        </a>
                       </li>
                       {/* <li>
                         <a

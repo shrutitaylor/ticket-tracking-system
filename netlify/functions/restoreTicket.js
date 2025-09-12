@@ -19,58 +19,37 @@ if (!admin.apps.length) {
     credential: admin.credential.cert(serviceAccount),
   });
 }
-
 const db = admin.firestore();
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ message: "Only POST allowed" }),
-    };
+    return { statusCode: 405, body: "Only POST allowed" };
   }
 
   try {
     const { ticketId } = JSON.parse(event.body);
 
-    if (!ticketId) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Missing ticketId" }),
-      };
+    // Get ticket from deletedTickets
+    const docRef = db.collection("deletedTickets").doc(ticketId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return { statusCode: 404, body: JSON.stringify({ error: "Ticket not found" }) };
     }
 
-    // 1. Get the ticket
-    const ticketRef = db.collection("tickets").doc(ticketId);
-    const ticketSnap = await ticketRef.get();
+    const ticketData = doc.data();
 
-    if (!ticketSnap.exists) {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ error: "Ticket not found" }),
-      };
-    }
+    // Add back to tickets collection
+    await db.collection("tickets").doc(ticketId).set(ticketData);
 
-    const ticketData = ticketSnap.data();
-
-    // 2. Copy to deletedTickets
-    await db.collection("deletedTickets").doc(ticketId).set({
-      ...ticketData,
-      deletedAt: new Date().toISOString(),
-    });
-
-    // 3. Delete from tickets
-    await ticketRef.delete();
+    // Remove from deletedTickets
+    await docRef.delete();
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: `Ticket ${ticketId} moved to recycle bin.` }),
+      body: JSON.stringify({ message: `Restored ticket ${ticketId}` }),
     };
   } catch (error) {
-    console.error("Error deleting ticket:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message }),
-    };
+    return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
   }
 };
