@@ -1,12 +1,92 @@
-# React + Vite
+# 🎟️ Ticketing & POS System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack **ticket management and POS (Point of Sale) system** built with **React, Firebase (Firestore, Auth)**, and **Netlify Functions**.
+It supports real-time ticket tracking, payments, and an admin-managed recycle bin for deleted tickets.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## Expanding the ESLint configuration
+* **Ticket Management**
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+  * Create, update, and delete tickets
+  * Search tickets by **name, phone, or date**
+  * Sort & filter with live updates
+
+* **Recycle Bin (Soft Delete)**
+
+  * Deleted tickets are moved to a `deletedTickets` collection
+  * Restore deleted tickets back into the main system
+  * Permanently remove tickets if required
+
+* **User Management**
+
+  * Admin-only access to registered users
+  * User authentication with Firebase Auth
+
+* **Tech Stack**
+
+  * **Frontend:** React + TailwindCSS
+  * **Backend:** Firebase Firestore + Auth
+  * **Serverless API:** Netlify Functions
+  * **Deployment:** Netlify
+
+---
+
+## 📂 Project Structure
+
+```
+project-root/
+├── src/                  # React frontend
+│   ├── components/       # UI components (tables, modals, buttons)
+│   └── App.jsx
+├── netlify/
+│   └── functions/        # Serverless backend (delete, restore, payments)
+├── firebaseConfig.js     # Firebase setup
+├── netlify.toml          # Netlify config
+└── README.md
+```
+
+---
+
+## ⚡ Getting Started
+
+1. **Clone the repo**
+
+   ```bash
+   git clone https://github.com/shrutitaylor/ticket-tracking-system.git
+   cd ticket-pos-system
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Setup Firebase**
+
+   * Create a Firebase project
+   * Add Firestore + Auth
+   * Update `firebaseConfig.js` with your credentials
+
+4. **Run locally with Netlify dev**
+
+   ```bash
+   netlify dev
+   ```
+
+5. **Deploy**
+
+   ```bash
+   netlify deploy --prod
+   ```
+
+---
+
+## 🔑 Admin Access
+
+* Only the **admin email** can view all users and manage tickets.
+* Other users can only access their own tickets.
+
+

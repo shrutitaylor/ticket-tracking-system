@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { TrashIcon } from "@heroicons/react/20/solid";
 
 export default function DeletedTicketsTable() {
   const [tickets, setTickets] = useState([]);
@@ -46,18 +47,18 @@ export default function DeletedTicketsTable() {
   }, []);
 
   return (
-    <div className="mt-10 mx-44 flex flex-col  justify-center overflow-x-auto">
+    <div className="mt-10 mx-6 sm:mx-44 flex flex-col  justify-center overflow-x-auto">
       <h2 className="text-2xl font-bold mb-4 text-black font-spaceGrotesk">Recycle Bin</h2>
-      <table className="min-w-full font-aoMono uppercase bg-white shadow-lg rounded-lg">
+      <table className="sm:min-w-full font-aoMono uppercase bg-white shadow-lg rounded-lg">
         <thead>
-          <tr className="bg-stone-300">
+          <tr className="bg-stone-300 text-xs sm:text-sm">
             <th className="px-4 py-2 text-left">Date</th>
             <th className="px-4 py-2 text-left">Name</th>
             <th className="px-4 py-2 text-left">Device</th>
             <th className="px-4 py-2 text-left">Actions</th>
           </tr>
         </thead>
-        <tbody className="text-sm divide-y divide-gray-200">
+        <tbody className="text-xs sm:text-sm divide-y divide-gray-200">
           {tickets.length === 0 ? (
             <tr>
               <td colSpan="4" className="text-center py-4 text-gray-500">
@@ -79,9 +80,9 @@ export default function DeletedTicketsTable() {
                   </button>
                   <button
                     onClick={() => handleDelete(ticket.id)}
-                    className="px-3 py-1 pt-2 bg-red-600 uppercase text-xs text-white rounded-md hover:bg-red-700"
+                    className="px-1 py-1  bg-red-600 uppercase text-xs text-white rounded-md hover:bg-red-700"
                   >
-                    Delete Permanently
+                    <TrashIcon height={20} width={20} />
                   </button>
                 </td>
               </tr>
